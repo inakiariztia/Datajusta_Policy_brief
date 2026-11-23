@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serie Policy Brief (2026) · Data Justa · Núcleo Milenio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500&display=swap" rel="stylesheet">
+  <style>
+/* =========================================================
+   Data Justa · Serie Policy Brief (2026)
+   Diseño base: 1920 × 1080. Todo escala con --u (1 px del diseño).
+   ========================================================= */
+
+/* ---------- Paleta y variables ---------- */
+:root {
+  --orange: #ff420f;
+  --black:  #1f1f1f;
+  --gray:   #a0a3a2;
+  --white:  #f8f8f8;
+
+  /* 1u = 1px del diseño a 1920×1080, ajustado al lado que limite */
+  --u: min(calc(100vw / 1920), calc(100vh / 1080));
+  --line: calc(3 * var(--u));
+  --fs: 1;                              /* escala del texto de los cuadros (slider) */
+  --ease: cubic-bezier(.65, 0, .25, 1);
+  --dur-panel: .8s;                     /* bloques grandes del índice */
+  --dur-item: .6s;                      /* rectángulo de cada fila del índice */
+
+  /* Tema naranja (por defecto) */
+  --bg: var(--orange);                  /* fondo */
+  --fg: var(--white);                   /* texto, líneas y cuadros */
+  --muted: var(--gray);
+  --ink: var(--black);                  /* texto sobre el cuadro del índice */
+  --deep: #4a2a21;                      /* fin de degradado del índice */
+  --strip-a: var(--orange);             /* rectángulos inferiores */
+  --strip-b: #ffffff;
+  --circle-a: var(--orange);            /* círculo de páginas internas */
+  --circle-b: #fff4ef;
+  --ball-a: #ff5a00;                    /* círculos del índice */
+  --ball-b: #4a2a21;
+  --glow: rgba(255, 255, 255, .85);
+  --logo-filter: none;
+}
+
+/* Blanco y negro (iluminado) */
+[data-theme="light"] {
+  --bg: var(--white);
+  --fg: var(--black);
+  --ink: var(--white);
+  --deep: #d9dbda;
+  --strip-a: var(--white);
+  --strip-b: var(--gray);
+  --circle-a: var(--white);
+  --circle-b: var(--gray);
+  --ball-a: var(--gray);
+  --ball-b: var(--white);
+  --glow: rgba(31, 31, 31, .35);
+  --logo-filter: invert(.88);
+}
+
+/* Negro y blanco (oscuro) */
+[data-theme="dark"] {
+  --bg: var(--black);
+  --fg: var(--white);
+  --ink: var(--black);
+  --deep: #3a3a3a;
+  --strip-a: var(--black);
+  --strip-b: var(--gray);
+  --circle-a: var(--black);
+  --circle-b: var(--gray);
+  --ball-a: var(--gray);
+  --ball-b: var(--black);
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  font-family: "Work Sans", system-ui, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .4s, color .4s;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+img { display: block; }
+
+.logo-mark img,
+.logo-word img {
+  height: calc(46 * var(--u));
+  width: auto;
+  filter: var(--logo-filter);
+}
+
+/* Textos que "se iluminan" al pasar el mouse */
+.glow { transition: text-shadow .3s, color .3s; }
+.glow:hover,
+.glow:focus-visible {
+  color: #fff;
+  text-shadow: 0 0 calc(10 * var(--u)) var(--glow), 0 0 calc(28 * var(--u)) var(--glow);
+  outline: none;
+}
+[data-theme="light"] .glow:hover,
+[data-theme="light"] .glow:focus-visible { color: #000; }
+
+.pendiente { font-style: italic; opacity: .7; }
+.sc { font-variant: all-small-caps; letter-spacing: .03em; }
+
+/* ---------- Barra superior (páginas internas) ---------- */
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: calc(60 * var(--u));
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 calc(27 * var(--u));
+  background: var(--bg);
+  border-bottom: var(--line) solid var(--fg);
+  transform: translateY(-100%);
+  transition: transform .45s var(--ease), background-color .4s;
+}
+.topbar.show { transform: none; }
+.topbar .logo-word { justify-self: center; }
+.topbar-contact {
+  justify-self: end;
+  font-size: calc(36 * var(--u));
+  transition: text-shadow .3s;
+}
+.topbar-contact:hover { text-shadow: 0 0 calc(10 * var(--u)) var(--glow); }
+
+/* =========================================================
+   ÍNDICE
+   ========================================================= */
+.index {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: var(--bg);
+}
+
+/* Bloque principal (filas) */
+.idx-main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 80.73%;                                   /* 1550 / 1920 */
+  height: calc(100% - 160 * var(--u));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(90deg, var(--bg), var(--deep));
+  transition: width var(--dur-panel) var(--ease), height var(--dur-panel) var(--ease);
+}
+.index.is-open .idx-main { width: 100%; height: 100%; }
+.idx-main > *:not(.idx-moon) { position: relative; z-index: 1; }
+
+/* Panel derecho con círculo (frame 1) */
+.idx-side {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  width: 19.27%;
+  height: calc(100% - 160 * var(--u));
+  overflow: hidden;
+  background: linear-gradient(90deg, var(--bg), var(--deep));
+  transition: transform var(--dur-panel) var(--ease);
+}
+.idx-ball {
+  position: absolute;
+  left: calc(8 * var(--u));
+  top: calc(96 * var(--u));
+  width: calc(728 * var(--u));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(to bottom left, var(--ball-a), var(--ball-b));
+}
+.index.is-open .idx-side { transform: translateX(100%); }
+
+/* Rectángulos inferiores (frame 1) */
+.idx-strips {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  height: calc(160 * var(--u));
+  display: flex;
+  transition: transform var(--dur-panel) var(--ease);
+}
+.index.is-open .idx-strips { transform: translateX(100%); }
+
+.strip-l, .strip-r { display: block; background: linear-gradient(90deg, var(--strip-a), var(--strip-b)); }
+.strip-l { width: 19.75%; }
+.strip-r { flex: 1; }
+
+/* Medio círculo que sube (frame 2) */
+.idx-moon {
+  position: absolute;
+  right: calc(40 * var(--u));
+  bottom: calc(-465 * var(--u));
+  z-index: 0;
+  width: calc(725 * var(--u));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--deep), var(--ball-a));
+  transform: translateY(100%);
+  transition: transform var(--dur-panel) var(--ease);
+}
+.index.is-open .idx-moon { transform: none; transition-delay: .12s; }
+
+/* Filas */
+.row {
+  display: grid;
+  align-items: center;
+  margin: 0;
+  padding: 0 calc(15 * var(--u)) 0 calc(25 * var(--u));
+  border-bottom: var(--line) solid var(--fg);
+}
+
+.idx-head {
+  height: calc(60 * var(--u));
+  flex-shrink: 0;
+  grid-template-columns: 29.5% 1fr auto;
+  font-size: calc(36 * var(--u));
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+
+.idx-nav {
+  height: calc(47 * var(--u));
+  grid-template-columns: 29.5% 26.5% 1fr auto;
+  font-size: calc(34 * var(--u));
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+.idx-nav a:last-child { justify-self: end; }
+
+.idx-title {
+  display: block;
+  height: calc(142 * var(--u));
+  font-size: calc(126 * var(--u));
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: calc(126 * var(--u));    /* el script lo recalcula con la medida real de la tipografía */
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+.idx-title span { color: var(--muted); }
+
+.idx-index {
+  display: block;
+  height: calc(96 * var(--u));
+  font-size: calc(102 * var(--u));
+  font-weight: 500;
+  line-height: calc(100 * var(--u));
+  letter-spacing: -.01em;
+}
+
+.idx-list { flex: 1; min-height: 0; }
+
+.idx-cols {
+  height: calc(49 * var(--u));
+  grid-template-columns: calc(192 * var(--u)) 1fr;
+  font-size: calc(40 * var(--u));
+  font-weight: 600;
+}
+
+.idx-item { border-bottom: var(--line) solid var(--fg); }
+
+.idx-item-head {
+  position: relative;
+  display: grid;
+  grid-template-columns: calc(192 * var(--u)) 1fr;
+  align-items: center;
+  height: calc(44 * var(--u));
+  padding: 0 calc(15 * var(--u)) 0 calc(25 * var(--u));
+  overflow: hidden;
+  /* al cerrar: el bloque se encoge entero y recién al final suelta el color */
+  transition: height var(--dur-item) var(--ease),
+              background-color .18s linear calc(var(--dur-item) * .8),
+              color .18s linear calc(var(--dur-item) * .8);
+}
+.idx-num {
+  position: absolute;
+  top: calc(16 * var(--u));
+  left: calc(25 * var(--u));
+  font-size: calc(64 * var(--u));
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity .15s linear;
+}
+.idx-name {
+  grid-column: 2;
+  font-size: calc(34 * var(--u));
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+  letter-spacing: .02em;
+  transition: font-size var(--dur-item) var(--ease), text-shadow .3s;
+}
+.idx-item:not(.open) .idx-item-head:hover .idx-name,
+.idx-item:not(.open) .idx-item-head:focus-visible .idx-name { text-shadow: 0 0 calc(10 * var(--u)) var(--glow); }
+.idx-item-head:focus-visible { outline: none; }
+
+.idx-item.open .idx-item-head {
+  height: calc(158 * var(--u));
+  background: var(--fg);
+  color: var(--bg);
+  /* al abrir: el bloque aparece sólido y crece junto con el recuadro de texto */
+  transition: height var(--dur-item) var(--ease),
+              background-color 0s,
+              color .28s var(--ease) .06s;
+}
+.idx-item.open .idx-num { opacity: 1; transition: opacity .3s ease .2s; }
+.idx-item.open .idx-name {
+  grid-column: 2;
+  font-size: var(--fit, calc(118 * var(--u)));
+  font-weight: 500;
+  letter-spacing: -.005em;
+}
+
+/* Texto desplegado bajo el título */
+.idx-detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-item) var(--ease);
+}
+.idx-item.open .idx-detail { grid-template-rows: 1fr; }
+.idx-detail-in {
+  display: grid;
+  grid-template-columns: 49.5% 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+.idx-sum {
+  height: calc(220 * var(--u));
+  padding: calc(30 * var(--u)) calc(22 * var(--u));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--fg);
+  color: var(--ink);
+  font-size: calc(18.5 * var(--u) * var(--fs));
+  line-height: 1.17;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) transparent;
+}
+.idx-sum p { margin: 0 0 .55em; }
+.idx-sum p:last-child { margin-bottom: 0; }
+.idx-sum::-webkit-scrollbar { width: calc(6 * var(--u)); }
+.idx-sum::-webkit-scrollbar-thumb { background: var(--ink); border-radius: 99px; }
+
+/* =========================================================
+   PÁGINAS INTERNAS
+   ========================================================= */
+.page {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: calc(60 * var(--u));
+  background: var(--bg);
+  color: var(--fg);
+  scroll-snap-align: start;
+  transition: background-color .4s, color .4s;
+}
+
+.page-label {
+  align-self: flex-start;
+  min-width: calc(528 * var(--u));
+  height: calc(48 * var(--u));
+  margin-top: calc(24 * var(--u));
+  padding: 0 calc(22 * var(--u)) 0 calc(26 * var(--u));
+  display: flex;
+  align-items: center;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: calc(37 * var(--u));
+  white-space: nowrap;
+}
+
+.page-intro {
+  padding: calc(18 * var(--u)) calc(32 * var(--u)) calc(18 * var(--u));
+  border-bottom: var(--line) solid var(--fg);
+}
+.page-lead {
+  margin: 0;
+  max-width: calc(1860 * var(--u));
+  font-size: calc(38 * var(--u));
+  font-weight: 600;
+  line-height: 1.22;
+}
+.page-note {
+  max-width: calc(900 * var(--u));
+  margin: calc(14 * var(--u)) 0 0 calc(-6 * var(--u));
+  padding-left: calc(18 * var(--u));
+  border-left: var(--line) solid var(--fg);
+  font-size: calc(17 * var(--u));
+  font-style: italic;
+  line-height: 1.15;
+}
+
+.page-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 48.7% 1fr;
+  column-gap: calc(30 * var(--u));
+  padding: calc(32 * var(--u)) calc(30 * var(--u)) calc(40 * var(--u)) calc(27 * var(--u));
+}
+
+.page-text {
+  min-height: 0;
+  overflow-y: auto;
+  font-size: calc(29.5 * var(--u));
+  line-height: 1.187;
+  scrollbar-width: none;
+}
+.page-text::-webkit-scrollbar { display: none; }
+.page-text p { margin: 0 0 calc(8 * var(--u)); }
+
+/* Menú de pestañas + cuadro blanco */
+.tabs {
+  position: relative;
+  z-index: 2;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: calc(262 * var(--u)) 1fr;
+}
+
+.tab-list { margin: 0; padding: 0; list-style: none; align-self: start; }
+.tab-list li {
+  padding-bottom: calc(4 * var(--u));
+  margin-bottom: calc(3 * var(--u));
+  border-bottom: var(--line) solid var(--fg);
+}
+.tab-list li:last-child { border-bottom: 0; }
+.tab-list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+  padding: calc(5 * var(--u)) calc(10 * var(--u));
+  border: 0;
+  background: transparent;
+  font-size: calc(19 * var(--u));
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .25s, color .25s;
+}
+.tab-list .ico { width: calc(16 * var(--u)); height: calc(16 * var(--u)); flex-shrink: 0; opacity: 0; }
+.tab-list li.active button { background: var(--fg); color: var(--bg); }
+.tab-list li.active .ico { opacity: 1; }
+.tab-list button:focus-visible { outline: calc(2 * var(--u)) dashed var(--fg); outline-offset: calc(2 * var(--u)); }
+
+.tab-panels { position: relative; min-height: 0; }
+
+.panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(16 * var(--u)) calc(22 * var(--u));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: calc(19 * var(--u) * var(--fs));
+  line-height: 1.16;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(18 * var(--u)));
+  transition: opacity .35s, transform .45s var(--ease), visibility 0s .45s;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg) transparent;
+}
+.panel::-webkit-scrollbar { width: calc(6 * var(--u)); }
+.panel::-webkit-scrollbar-thumb { background: var(--bg); border-radius: 99px; }
+.panel.lg { font-size: calc(30 * var(--u) * var(--fs)); padding-top: calc(10 * var(--u)); }
+.panel p { margin: 0 0 .7em; }
+.panel.lg p { margin-bottom: 1.1em; }
+.panel .footnote {
+  margin: auto 0 0;
+  padding-top: calc(1.5em);
+  max-width: 96%;
+  font-size: .52em;
+  font-weight: 600;
+  line-height: 1.2;
+  position: relative;
+}
+.panel .footnote::before {
+  content: "";
+  position: absolute;
+  top: .6em;
+  left: 0;
+  width: calc(125 * var(--u));
+  border-top: calc(1 * var(--u)) solid currentColor;
+}
+.tabs.open .panel.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity .35s, transform .45s var(--ease), visibility 0s;
+}
+
+/* Círculo decorativo */
+.page-circle {
+  position: absolute;
+  top: calc(395 * var(--u));
+  right: calc(27 * var(--u));
+  z-index: 1;
+  width: calc(546 * var(--u));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--circle-a), var(--circle-b));
+  pointer-events: none;
+  transition: opacity .4s, transform .6s var(--ease);
+}
+.page.tabs-open .page-circle { opacity: 0; transform: scale(.94); }
+
+/* Rectángulos inferiores */
+.page-strip {
+  flex-shrink: 0;
+  height: calc(73 * var(--u));
+  display: flex;
+}
+.page-strip .strip-l { width: 19.95%; }
+
+/* =========================================================
+   CONTROLES DE VISUALIZACIÓN
+   ========================================================= */
+.theme {
+  position: fixed;
+  right: calc(27 * var(--u));
+  bottom: calc(12 * var(--u));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s;
+}
+.theme.show { opacity: 1; pointer-events: auto; }
+
+.theme-toggle,
+.sw {
+  width: calc(50 * var(--u));
+  height: calc(50 * var(--u));
+  min-width: 30px;
+  min-height: 30px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(90deg, #fff 0%, #ffd8cb 55%, #ff9c80 100%);
+  color: var(--orange);
+  box-shadow: 0 0 0 calc(1 * var(--u)) rgba(255, 255, 255, .6);
+  transition: transform .35s var(--ease);
+}
+.theme-toggle .ico { width: 44%; height: 44%; }
+.theme-toggle[aria-expanded="true"] { transform: rotate(180deg); }
+
+.theme-options {
+  display: flex;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(30 * var(--u)));
+  transition: opacity .3s, transform .4s var(--ease), visibility 0s .4s;
+}
+.theme.open .theme-options {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity .3s, transform .4s var(--ease), visibility 0s;
+}
+
+.sw { transition: transform .2s; }
+.sw:hover { transform: scale(1.08); }
+.sw[aria-pressed="true"] { outline: calc(3 * var(--u)) solid var(--black); outline-offset: calc(3 * var(--u)); }
+.sw[aria-disabled="true"] { cursor: not-allowed; }
+.sw[aria-disabled="true"]:hover { transform: none; }
+.sw-orange  { background: var(--orange); box-shadow: inset 0 0 0 calc(2 * var(--u)) rgba(255,255,255,.7); }
+.sw-dark    { background: #000; }
+.sw-light   { background: #fff; box-shadow: inset 0 0 0 calc(1 * var(--u)) rgba(0,0,0,.15); }
+
+/* Slider tamaño de letra */
+.fs-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  align-items: end;
+  width: calc(148 * var(--u));
+  min-width: 90px;
+  color: var(--black);
+  cursor: pointer;
+}
+.fs-small { font-size: calc(16 * var(--u)); font-weight: 600; }
+.fs-big   { font-size: calc(28 * var(--u)); font-weight: 600; justify-self: end; line-height: 1; }
+.fs-control input {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: calc(4 * var(--u)) 0 0;
+  height: calc(16 * var(--u));
+  min-height: 12px;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.fs-control input::-webkit-slider-runnable-track { height: calc(3 * var(--u)); min-height: 2px; background: var(--black); }
+.fs-control input::-moz-range-track { height: calc(3 * var(--u)); min-height: 2px; background: var(--black); }
+.fs-control input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: calc(14 * var(--u)); height: calc(14 * var(--u));
+  min-width: 11px; min-height: 11px;
+  margin-top: calc(-6 * var(--u));
+  border-radius: 50%;
+  background: #fff;
+  border: calc(3 * var(--u)) solid var(--black);
+}
+.fs-control input::-moz-range-thumb {
+  width: calc(10 * var(--u)); height: calc(10 * var(--u));
+  border-radius: 50%;
+  background: #fff;
+  border: calc(3 * var(--u)) solid var(--black);
+}
+
+/* =========================================================
+   PANTALLAS PEQUEÑAS (celular / tablet vertical)
+   ========================================================= */
+@media (max-width: 900px) {
+  :root { --u: calc(100vw / 820); }
+  html { scroll-snap-type: y proximity; }
+
+  .index { height: auto; min-height: 100svh; }
+  .idx-main,
+  .index.is-open .idx-main { position: relative; width: 100%; height: auto; min-height: 100svh; }
+  .idx-side, .idx-strips, .idx-moon { display: none; }
+
+  .idx-nav { height: auto; grid-template-columns: 1fr 1fr; row-gap: calc(6 * var(--u)); padding-top: calc(8 * var(--u)); padding-bottom: calc(8 * var(--u)); }
+  .idx-nav a:last-child { justify-self: start; }
+  .idx-title { height: auto; white-space: normal; font-size: calc(96 * var(--u)); line-height: 1.05; padding-top: calc(10 * var(--u)); padding-bottom: calc(14 * var(--u)); }
+  .idx-item-head { height: auto; min-height: calc(56 * var(--u)); }
+  .idx-name { white-space: normal; padding: calc(8 * var(--u)) 0; }
+  .idx-item.open .idx-item-head { height: auto; }
+  .idx-item.open .idx-name { font-size: calc(60 * var(--u)); }
+  .idx-num { position: static; font-size: calc(48 * var(--u)); display: none; }
+  .idx-item.open .idx-num { display: block; padding-top: calc(10 * var(--u)); }
+  .idx-item-head, .idx-cols { grid-template-columns: calc(110 * var(--u)) 1fr; }
+  .idx-detail-in { grid-template-columns: 1fr; }
+  .idx-detail-in > span { display: none; }
+  .idx-sum { height: auto; max-height: calc(420 * var(--u)); font-size: calc(26 * var(--u) * var(--fs)); }
+
+  .page { height: auto; min-height: 100svh; }
+  .page-label { min-width: 0; height: auto; padding-top: calc(6 * var(--u)); padding-bottom: calc(6 * var(--u)); white-space: normal; font-size: calc(34 * var(--u)); }
+  .page-lead { font-size: calc(40 * var(--u)); }
+  .page-note { font-size: calc(22 * var(--u)); }
+  .page-body { grid-template-columns: 1fr; row-gap: calc(36 * var(--u)); }
+  .page-text { overflow: visible; }
+
+  .tabs { grid-template-columns: 1fr; row-gap: calc(16 * var(--u)); }
+  .tab-list button { font-size: calc(26 * var(--u)); padding: calc(10 * var(--u)); white-space: normal; }
+  .tab-list .ico { width: calc(22 * var(--u)); height: calc(22 * var(--u)); }
+  .panel {
+    position: relative;
+    inset: auto;
+    display: none;
+    max-height: 65svh;
+    font-size: calc(26 * var(--u) * var(--fs));
+    padding: calc(22 * var(--u));
+    opacity: 1; visibility: visible; transform: none;
+  }
+  .panel.lg { font-size: calc(30 * var(--u) * var(--fs)); }
+  .panel.active { display: flex; }
+  .page-circle { display: none; }
+  .page-strip { margin-top: calc(40 * var(--u)); height: calc(90 * var(--u)); }
+
+  .theme { flex-direction: column-reverse; align-items: flex-end; }
+  .theme-options { flex-wrap: wrap; justify-content: flex-end; max-width: 80vw; padding: 10px; background: rgba(255,255,255,.92); border-radius: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; transition-delay: 0s !important; }
+}
+
+</style>
+  <style id="cover-css">
+  /* ===== PORTADA ANIMADA (INCIDIR) ===== */
+  #cover {
+    --naranjo: #ff420f;
+    --F: 25.35vw;          /* tamaño de las letras gigantes */
+    --colw: 43.8%;                 /* ancho columna izquierda */
+    --font: "Work Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Escenario a pantalla completa */
+
+  /* ---------- Paneles ---------- */
+  .cv-panel { position: absolute; overflow: hidden; will-change: transform, opacity; }
+  .cv-tl { transform-origin: 100% 100%; }
+  .cv-tr { transform-origin: 0% 100%; }
+  .cv-bl { transform-origin: 100% 0%; }
+  .cv-br { transform-origin: 0% 0%; }
+  .cv-tl { left: 0; top: 0; width: var(--colw); height: 50%;
+        background:
+          radial-gradient(ellipse 34% 86% at 100% 50%, #97a8a9 0, #97a8a9 45%, rgba(151,168,169,0) 100%),
+          linear-gradient(180deg, #ef4504 0%, #e5430d 55%, #f34600 100%); }
+  .cv-tr { left: var(--colw); top: 0; right: 0; height: 50%;
+        background: linear-gradient(90deg, #ff2000 0%, #ff2300 2%, #ff3200 11%, #ff450b 29%, #f85630 47%, #ec6648 64%, #e1755d 82%, #d48270 100%); }
+  .cv-bl { left: 0; top: 50%; width: var(--colw); bottom: 0;
+        background:
+          radial-gradient(circle 18vw at 100% 100%, rgba(0,17,27,1) 0%, rgba(0,17,27,0.97) 10%, rgba(0,17,27,0.89) 20%, rgba(0,17,27,0.76) 30%, rgba(0,17,27,0.6) 40%, rgba(0,17,27,0.44) 50%, rgba(0,17,27,0.3) 60%, rgba(0,17,27,0.18) 70%, rgba(0,17,27,0.09) 80%, rgba(0,17,27,0.035) 90%, rgba(0,17,27,0) 100%),
+          radial-gradient(circle 190px at 0% 100%, rgba(153,171,174,.4) 0, rgba(153,171,174,0) 100%),
+          radial-gradient(ellipse 480px 330px at 0% 0%, #99abae 0, rgba(153,171,174,.9) 18%, rgba(153,171,174,.7) 36%, rgba(153,171,174,.2) 72%, rgba(153,171,174,0) 100%),
+          #e64312; }
+  .cv-br { left: var(--colw); top: 50%; right: 0; bottom: 0; background: #51261b; }
+  .cv-br .cv-a { position: absolute; left: 0; top: 0; bottom: 0; width: 60.3%;
+           background: linear-gradient(90deg, #51281a 0%, #ff3c00 100%); }
+  .cv-br .cv-b { position: absolute; left: 60.3%; top: 0; right: 0; bottom: 0;
+           background: linear-gradient(180deg, #51261b 0%, #52261b 4%, #93321a 40%, #c83d17 70%, #fc4711 100%); }
+
+  /* Círculo con degradado */
+  .cv-circle { position: absolute; width: 34.8vw; aspect-ratio: 1; border-radius: 50%;
+            left: 4.3vw; top: calc(24.9vh - 17.4vw);
+            background: linear-gradient(90deg, #ff4800 0%, #f74000 10.6%, #c03200 30.6%, #701e00 59.3%, #310e00 82.3%, #090300 97%, #060100 100%); }
+
+  
+  @supports (color: color(display-p3 1 1 1)) {
+.cv-tl { left: 0; top: 0; width: var(--colw); height: 50%;
+        background:
+          radial-gradient(in display-p3 ellipse 34% 86% at 100% 50%, color(display-p3 0.6039 0.6549 0.6627) 0, color(display-p3 0.6039 0.6549 0.6627) 45%, color(display-p3 0.6039 0.6549 0.6627 / 0) 100%),
+          linear-gradient(in display-p3 180deg, color(display-p3 0.8667 0.3255 0.1529) 0%, color(display-p3 0.8275 0.3137 0.1569) 55%, color(display-p3 0.8784 0.3294 0.1490) 100%); }
+  .cv-tr { left: var(--colw); top: 0; right: 0; height: 50%;
+        background: linear-gradient(in display-p3 90deg, color(display-p3 1.0000 0.2588 0.0588) 0%, color(display-p3 0.9961 0.2627 0.0627) 2%, color(display-p3 0.9765 0.2902 0.1020) 11%, color(display-p3 0.9412 0.3373 0.1725) 29%, color(display-p3 0.9020 0.3843 0.2471) 47%, color(display-p3 0.8627 0.4314 0.3176) 64%, color(display-p3 0.8275 0.4824 0.3882) 82%, color(display-p3 0.7882 0.5255 0.4549) 100%); }
+  .cv-bl { left: 0; top: 50%; width: var(--colw); bottom: 0;
+        background:
+          radial-gradient(in display-p3 circle 18vw at 100% 100%, color(display-p3 0.0118 0.0667 0.1020 / 1) 0%, color(display-p3 0.0118 0.0667 0.1020 / 0.97) 10%, color(display-p3 0.0118 0.0667 0.1020 / 0.89) 20%, color(display-p3 0.0118 0.0667 0.1020 / 0.76) 30%, color(display-p3 0.0118 0.0667 0.1020 / 0.6) 40%, color(display-p3 0.0118 0.0667 0.1020 / 0.44) 50%, color(display-p3 0.0118 0.0667 0.1020 / 0.3) 60%, color(display-p3 0.0118 0.0667 0.1020 / 0.18) 70%, color(display-p3 0.0118 0.0667 0.1020 / 0.09) 80%, color(display-p3 0.0118 0.0667 0.1020 / 0.035) 90%, color(display-p3 0.0118 0.0667 0.1020 / 0) 100%),
+          radial-gradient(in display-p3 circle 190px at 0% 100%, color(display-p3 0.6118 0.6667 0.6784 / .4) 0, color(display-p3 0.6118 0.6667 0.6784 / 0) 100%),
+          radial-gradient(in display-p3 ellipse 480px 330px at 0% 0%, color(display-p3 0.6118 0.6667 0.6784) 0, color(display-p3 0.6118 0.6667 0.6784 / .9) 18%, color(display-p3 0.6118 0.6667 0.6784 / .7) 36%, color(display-p3 0.6118 0.6667 0.6784 / .2) 72%, color(display-p3 0.6118 0.6667 0.6784 / 0) 100%),
+          color(display-p3 0.8314 0.3137 0.1647); }
+  .cv-br { left: var(--colw); top: 50%; right: 0; bottom: 0; background: color(display-p3 0.2941 0.1569 0.1176); }
+  .cv-br .cv-a { position: absolute; left: 0; top: 0; bottom: 0; width: 60.3%;
+           background: linear-gradient(in display-p3 90deg, color(display-p3 0.2980 0.1647 0.1137) 0%, color(display-p3 1.0000 0.3216 0.0000) 100%); }
+  .cv-br .cv-b { position: absolute; left: 60.3%; top: 0; right: 0; bottom: 0;
+           background: linear-gradient(in display-p3 180deg, color(display-p3 0.2941 0.1569 0.1176) 0%, color(display-p3 0.2980 0.1569 0.1176) 4%, color(display-p3 0.5333 0.2235 0.1373) 40%, color(display-p3 0.7255 0.2824 0.1569) 70%, color(display-p3 0.9137 0.3373 0.1765) 100%); }
+
+  /* Círculo con degradado */
+  .cv-circle { position: absolute; width: 34.8vw; aspect-ratio: 1; border-radius: 50%;
+            left: 4.3vw; top: calc(24.9vh - 17.4vw);
+            background: linear-gradient(in display-p3 90deg, color(display-p3 1.0000 0.3529 0.0000) 0%, color(display-p3 0.8941 0.3137 0.0000) 10.6%, color(display-p3 0.6941 0.2431 0.0000) 30.6%, color(display-p3 0.4039 0.1412 0.0000) 59.3%, color(display-p3 0.1765 0.0627 0.0000) 82.3%, color(display-p3 0.0314 0.0118 0.0000) 97%, color(display-p3 0.0196 0.0039 0.0000) 100%); }
+
+  
+  }
+
+  /* ---------- Textos ---------- */
+  .cv-logo { position: absolute; left: 21.7vw; top: 25.1vh; width: 15.4vw; transform: translate(-50%, -50%); }
+  .cv-logo svg { display: block; width: 100%; height: auto; }
+  #index:focus { outline: none; }
+  .cv-sub { position: absolute; left: 48vw; top: 29.5vh; font-size: 2.5vw; line-height: 1.32; font-weight: 400; }
+  .cv-rule { position: absolute; left: 48vw; right: 0; top: 43.9vh; height: 2px; background: #fff; transform-origin: left; }
+  .cv-vert { position: absolute; left: 95.3vw; top: 98.4vh; transform-origin: top left;
+          transform: rotate(-90deg); font-size: 4.4vw; line-height: 1; font-weight: 500; white-space: nowrap; color: #fff; }
+
+  /* ---------- Letras gigantes (posición final) ---------- */
+  .cv-L { position: absolute; font-weight: 800; line-height: .72; font-size: var(--F);
+       white-space: nowrap; color: #fff; transform-origin: 0 0; z-index: 5;
+       will-change: transform, opacity; user-select: none; }
+  #cv-ci  { left: 46.1vw; top: calc(18.44vh - .7035 * var(--F)); }
+  #cv-dir { left: 44.8vw; top: calc(105.9vh - .7035 * var(--F)); }
+  #cv-in  { left: calc(-5.44vw); top: 99.06vh; transform: rotate(-90deg); }
+
+  html.cv-lock, html.cv-lock body { overflow: hidden !important; }
+  #cover { position: fixed; inset: 0; z-index: 99999; overflow: hidden;
+           background: var(--naranjo); color: #fff; font-family: var(--font); will-change: transform; }
+  #cover, #cover * { box-sizing: border-box; margin: 0; padding: 0; }
+  #cv-stage { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+  #cv-stage.ready { visibility: visible; }
+
+  /* =========================================================
+     RESPONSIVO · portada
+     (el escritorio horizontal no cambia; todo lo de abajo solo
+     se activa en pantallas verticales y en celulares horizontales)
+     ========================================================= */
+  #cover { touch-action: none; overscroll-behavior: none; }
+
+  /* ---------- Vertical: celulares y tablets ----------
+     Misma diagramación del escritorio (2×2 paneles; círculo arriba izquierda,
+     "CI" arriba derecha, "IN" girada abajo izquierda, "DIR" abajo derecha),
+     pero los tamaños dependen del ANCHO y no del alto.
+     --cw / --ch = ancho y alto reales de la portada (el JS los fija en px,
+     así la barra del navegador móvil no descuadra nada). */
+  @media (max-aspect-ratio: 1/1) {
+    #cover {
+      --cw: 100vw;
+      --ch: 100vh;
+      --colw: 42%;                              /* columna izquierda */
+      --xl: calc(var(--cw) * .42);
+      --F: calc(var(--cw) * .295);              /* letras gigantes */
+      --D: calc(var(--cw) * .43);               /* círculo */
+    }
+
+    /* Círculo y logo: centrados en el panel superior izquierdo */
+    .cv-circle { width: var(--D); left: calc((var(--xl) - var(--D)) / 2); top: calc(var(--ch) * .25 - var(--D) / 2); }
+    .cv-logo   { width: calc(var(--D) * .7); left: calc(var(--xl) / 2); top: calc(var(--ch) * .25); }
+
+    /* Subtítulo y línea (mismas posiciones relativas que en escritorio) */
+    .cv-sub  { left: calc(var(--xl) + var(--cw) * .042); right: calc(var(--cw) * .03); top: auto;
+               bottom: calc(var(--ch) * .581); font-size: calc(var(--cw) * .036); line-height: 1.32; }
+    .cv-rule { left: calc(var(--xl) + var(--cw) * .042); top: calc(var(--ch) * .439); }
+    .cv-vert { left: calc(var(--cw) * .935); top: calc(var(--ch) * .984); font-size: calc(var(--cw) * .056); }
+
+    /* Letras: CI sangra por arriba, DIR por abajo, IN va girada a la izquierda */
+    #cv-ci  { left: calc(var(--xl) + var(--cw) * .023); top: calc(-.1835 * var(--F)); }
+    #cv-dir { left: calc(var(--xl) + var(--cw) * .01);  top: calc(var(--ch) - .6535 * var(--F)); }
+    #cv-in  { left: calc(-.2146 * var(--F)); top: calc(var(--ch) * .9906); }
+  }
+
+  /* ---------- Celular en horizontal ----------
+     Los tamaños dependen del alto (si no, las letras y textos se montan). */
+  @media (orientation: landscape) and (max-height: 600px) {
+    #cover { --vwu: min(1vw, 1.7778vh); --F: calc(25.35 * var(--vwu)); }
+    .cv-circle { width: calc(34.8 * var(--vwu)); left: calc(21.7vw - 17.4 * var(--vwu)); top: calc(24.9vh - 17.4 * var(--vwu)); }
+    .cv-logo   { width: calc(15.4 * var(--vwu)); }
+    .cv-sub    { font-size: calc(2.5 * var(--vwu)); }
+    .cv-vert   { font-size: calc(4.4 * var(--vwu)); }
+    #cv-in     { left: calc(-.2146 * var(--F)); }
+  }
+
+  </style>
+</head>
+<body>
+
+<!-- ===================== PORTADA ANIMADA ===================== -->
+<div id="cover" role="img" aria-label="Portada INCIDIR 2026 · Protección de Datos Personales en Registros Estatales">
+<div id="cv-stage">
+  <div class="cv-panel cv-tl" id="cv-p-tl"><div class="cv-circle" id="cv-circle"></div><div class="cv-logo" id="cv-logo"><svg viewBox="0 0 280 168" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data Justa, Núcleo Milenio"><g stroke="#fff" stroke-width="1.6" fill="none"><line x1="1.0" y1="32" x2="1.0" y2="88"/><line x1="6.3" y1="8" x2="6.3" y2="88"/><line x1="11.7" y1="4" x2="11.7" y2="88"/><line x1="17.0" y1="40" x2="17.0" y2="88"/><line x1="22.4" y1="40" x2="22.4" y2="88"/><line x1="27.7" y1="20" x2="27.7" y2="88"/><line x1="33.1" y1="4" x2="33.1" y2="88"/><line x1="38.4" y1="4" x2="38.4" y2="88"/><line x1="43.8" y1="14" x2="43.8" y2="88"/><line x1="49.1" y1="14" x2="49.1" y2="88"/><line x1="54.5" y1="20" x2="54.5" y2="88"/><line x1="59.8" y1="8" x2="59.8" y2="88"/><line x1="65.2" y1="46" x2="65.2" y2="88"/><line x1="70.5" y1="46" x2="70.5" y2="88"/><line x1="75.8" y1="26" x2="75.8" y2="88"/><line x1="81.2" y1="8" x2="81.2" y2="88"/><line x1="86.5" y1="32" x2="86.5" y2="88"/><line x1="91.9" y1="8" x2="91.9" y2="88"/><line x1="97.2" y1="14" x2="97.2" y2="88"/><line x1="102.6" y1="8" x2="102.6" y2="88"/><line x1="107.9" y1="32" x2="107.9" y2="88"/><line x1="113.3" y1="46" x2="113.3" y2="88"/><line x1="118.6" y1="46" x2="118.6" y2="88"/><line x1="124.0" y1="26" x2="124.0" y2="88"/><line x1="129.3" y1="46" x2="129.3" y2="88"/><line x1="134.7" y1="32" x2="134.7" y2="88"/><line x1="140.0" y1="14" x2="140.0" y2="88"/><line x1="145.3" y1="20" x2="145.3" y2="88"/><line x1="150.7" y1="40" x2="150.7" y2="88"/><line x1="156.0" y1="8" x2="156.0" y2="88"/><line x1="161.4" y1="14" x2="161.4" y2="88"/><line x1="166.7" y1="26" x2="166.7" y2="88"/><line x1="172.1" y1="40" x2="172.1" y2="88"/><line x1="177.4" y1="14" x2="177.4" y2="88"/><line x1="182.8" y1="14" x2="182.8" y2="88"/><line x1="188.1" y1="32" x2="188.1" y2="88"/><line x1="193.5" y1="4" x2="193.5" y2="88"/><line x1="198.8" y1="40" x2="198.8" y2="88"/><line x1="204.2" y1="40" x2="204.2" y2="88"/><line x1="209.5" y1="46" x2="209.5" y2="88"/><line x1="214.8" y1="8" x2="214.8" y2="88"/><line x1="220.2" y1="32" x2="220.2" y2="88"/><line x1="225.5" y1="40" x2="225.5" y2="88"/><line x1="230.9" y1="32" x2="230.9" y2="88"/><line x1="236.2" y1="46" x2="236.2" y2="88"/><line x1="241.6" y1="8" x2="241.6" y2="88"/><line x1="246.9" y1="46" x2="246.9" y2="88"/><line x1="252.3" y1="20" x2="252.3" y2="88"/><line x1="257.6" y1="14" x2="257.6" y2="88"/><line x1="263.0" y1="26" x2="263.0" y2="88"/><line x1="268.3" y1="26" x2="268.3" y2="88"/><line x1="273.7" y1="32" x2="273.7" y2="88"/><line x1="279.0" y1="32" x2="279.0" y2="88"/><line x1="0" y1="89" x2="280" y2="89" stroke-width="1.8"/></g><g fill="#fff"><circle cx="1.0" cy="43" r="1.5"/><circle cx="6.3" cy="53" r="1.5"/><circle cx="11.7" cy="23" r="1.5"/><circle cx="17.0" cy="33" r="1.5"/><circle cx="17.0" cy="65" r="1.5"/><circle cx="22.4" cy="33" r="1.5"/><circle cx="27.7" cy="13" r="1.5"/><circle cx="33.1" cy="2" r="1.5"/><circle cx="33.1" cy="40" r="1.5"/><circle cx="38.4" cy="2" r="1.5"/><circle cx="38.4" cy="65" r="1.5"/><circle cx="43.8" cy="7" r="1.5"/><circle cx="49.1" cy="7" r="1.5"/><circle cx="54.5" cy="13" r="1.5"/><circle cx="59.8" cy="2" r="1.5"/><circle cx="65.2" cy="39" r="1.5"/><circle cx="65.2" cy="64" r="1.5"/><circle cx="70.5" cy="39" r="1.5"/><circle cx="75.8" cy="19" r="1.5"/><circle cx="75.8" cy="49" r="1.5"/><circle cx="81.2" cy="2" r="1.5"/><circle cx="86.5" cy="25" r="1.5"/><circle cx="86.5" cy="44" r="1.5"/><circle cx="91.9" cy="2" r="1.5"/><circle cx="91.9" cy="37" r="1.5"/><circle cx="97.2" cy="64" r="1.5"/><circle cx="107.9" cy="25" r="1.5"/><circle cx="107.9" cy="71" r="1.5"/><circle cx="113.3" cy="39" r="1.5"/><circle cx="113.3" cy="62" r="1.5"/><circle cx="118.6" cy="39" r="1.5"/><circle cx="118.6" cy="77" r="1.5"/><circle cx="124.0" cy="19" r="1.5"/><circle cx="129.3" cy="39" r="1.5"/><circle cx="129.3" cy="75" r="1.5"/><circle cx="134.7" cy="25" r="1.5"/><circle cx="140.0" cy="7" r="1.5"/><circle cx="145.3" cy="43" r="1.5"/><circle cx="150.7" cy="33" r="1.5"/><circle cx="156.0" cy="2" r="1.5"/><circle cx="156.0" cy="33" r="1.5"/><circle cx="166.7" cy="19" r="1.5"/><circle cx="172.1" cy="53" r="1.5"/><circle cx="177.4" cy="7" r="1.5"/><circle cx="177.4" cy="53" r="1.5"/><circle cx="182.8" cy="7" r="1.5"/><circle cx="182.8" cy="48" r="1.5"/><circle cx="188.1" cy="25" r="1.5"/><circle cx="188.1" cy="48" r="1.5"/><circle cx="193.5" cy="2" r="1.5"/><circle cx="198.8" cy="33" r="1.5"/><circle cx="198.8" cy="63" r="1.5"/><circle cx="204.2" cy="33" r="1.5"/><circle cx="204.2" cy="54" r="1.5"/><circle cx="209.5" cy="39" r="1.5"/><circle cx="209.5" cy="55" r="1.5"/><circle cx="214.8" cy="2" r="1.5"/><circle cx="214.8" cy="22" r="1.5"/><circle cx="220.2" cy="25" r="1.5"/><circle cx="220.2" cy="53" r="1.5"/><circle cx="225.5" cy="33" r="1.5"/><circle cx="225.5" cy="59" r="1.5"/><circle cx="230.9" cy="25" r="1.5"/><circle cx="230.9" cy="71" r="1.5"/><circle cx="236.2" cy="39" r="1.5"/><circle cx="236.2" cy="58" r="1.5"/><circle cx="241.6" cy="2" r="1.5"/><circle cx="246.9" cy="54" r="1.5"/><circle cx="257.6" cy="7" r="1.5"/><circle cx="268.3" cy="19" r="1.5"/><circle cx="279.0" cy="25" r="1.5"/></g><text x="0" y="143" fill="#fff" font-family="'Barlow Condensed','Arial Narrow',Arial,sans-serif" font-weight="500" font-size="68" textLength="280" lengthAdjust="spacingAndGlyphs">Data Justa</text><text x="0" y="166" fill="#fff" font-family="'Work Sans',Arial,sans-serif" font-weight="800" font-size="14" textLength="280" lengthAdjust="spacing">NÚCLEO MILENIO</text></svg></div></div>
+  <div class="cv-panel cv-tr" id="cv-p-tr"></div>
+  <div class="cv-panel cv-bl" id="cv-p-bl"></div>
+  <div class="cv-panel cv-br" id="cv-p-br"><div class="cv-a"></div><div class="cv-b"></div></div>
+
+  <div class="cv-sub" id="cv-sub">Protección de Datos<br>Personales en Registros Estatales</div>
+  <div class="cv-rule" id="cv-rule"></div>
+  <div class="cv-vert" id="cv-vert">2026</div>
+
+  <div style="position:absolute;inset:0;font-size:0">
+    <span class="cv-L" id="cv-in"  aria-hidden="true">IN</span>
+    <span class="cv-L" id="cv-ci"  aria-hidden="true">CI</span>
+    <span class="cv-L" id="cv-dir" aria-hidden="true">DIR</span>
+  </div>
+</div>
+</div>
+
+
+<!-- Ícono de flecha reutilizable -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="0 0 20 20">
+    <path d="M4 4 L16 16 M16 6.5 V16 H6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/>
+  </symbol>
+</svg>
+
+<!-- ============ BARRA SUPERIOR (páginas internas) ============ -->
+<header class="topbar" aria-label="Encabezado">
+  <a href="#index" class="logo-mark"><img src="data:image/png;base64,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" alt="Data Justa"></a>
+  <a href="#index" class="logo-word"><img src="data:image/png;base64,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" alt="Data Justa · Núcleo Milenio"></a>
+  <a href="#" class="topbar-contact">Contacto</a>
+</header>
+
+<main id="scroller">
+
+  <!-- ===================== ÍNDICE ===================== -->
+  <section class="index" id="index">
+
+    <div class="idx-side" aria-hidden="true"><span class="idx-ball"></span></div>
+    <div class="idx-strips" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+
+    <div class="idx-main">
+      <span class="idx-moon" aria-hidden="true"></span>
+
+      <div class="row idx-head">
+        <a href="#index" class="logo-mark"><img src="data:image/png;base64,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" alt="Data Justa"></a>
+        <a href="#index" class="logo-word"><img src="data:image/png;base64,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" alt="Data Justa · Núcleo Milenio"></a>
+        <a href="#" class="glow">Contacto</a>
+      </div>
+
+      <nav class="idx-navs" aria-label="Navegación principal">
+        <div class="row idx-nav">
+          <a href="#" class="glow">Objetivos</a>
+          <a href="#" class="glow">Equipo</a>
+          <a href="#" class="glow">Publicaciones</a>
+          <a href="#" class="glow">Noticias</a>
+        </div>
+        <div class="row idx-nav">
+          <a href="#" class="glow">Investigación</a>
+          <a href="#" class="glow">Plataforma</a>
+          <a href="#" class="glow">Formación</a>
+          <a href="#" class="glow">Instagram</a>
+        </div>
+      </nav>
+
+      <h1 class="row idx-title">Serie–<span>Policy Brief(2026)</span></h1>
+      <div class="row idx-index">Index</div>
+
+      <div class="idx-list">
+        <div class="row idx-cols"><span>No.</span><span>Título</span></div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#editorial">
+            <span class="idx-num">P3</span><span class="idx-name">Editorial | Serie Policy Brief</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p>Data Justa, un Núcleo Milenio, estudia cómo el Estado chileno registra y gestiona datos sobre víctimas de graves violaciones a los derechos humanos. Su Serie Policy Briefs traduce esos hallazgos en recomendaciones claras y viables para quienes legislan, diseñan e implementan políticas públicas, así como para organizaciones de la sociedad civil y redes internacionales. Aborda dos áreas: las condiciones normativas y técnicas de los datos (Ley N° 21.719, arquitectura de datos humanitarios, gobernanza interinstitucional) y la calidad de la respuesta a las víctimas, incluido el cuidado de los equipos. Su idea central: los registros estatales no son neutrales, pues definen qué daño se reconoce y a quién se considera víctima.</p></div>
+          </div></div>
+        </div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#resumen">
+            <span class="idx-num">P4</span><span class="idx-name">Resumen ejecutivo</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p><strong>Resumen ejecutivo.</strong> La Ley 21.719 obliga a todo el Estado a un nuevo estándar de tratamiento de datos. Los registros de víctimas son a la vez la huella de las fallas del Estado y la base para responderles, por lo que mal tratados pueden replicar la violencia original. Propone tres recomendaciones de implementación, sin cambiar la ley: clasificar por defecto como dato sensible, prohibir la reserva frente a la propia víctima y consolidar la trazabilidad en un formato único.</p></div>
+          </div></div>
+        </div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#introduccion">
+            <span class="idx-num">P5</span><span class="idx-name">Introducción</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p><strong>Introducción.</strong> La ley entra en vigencia el 1 de diciembre de 2026 y no debería leerse solo como cumplimiento, sino como una oportunidad para fortalecer los derechos de las víctimas como titulares de sus datos. Plantea el caso ficticio de Marisol para mostrar tres nudos críticos: clasificación, acceso e interoperabilidad. Aclara que las recomendaciones son orientaciones a revisar según lo que muestre la práctica.</p></div>
+          </div></div>
+        </div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#marisol">
+            <span class="idx-num">P6</span><span class="idx-name">Marisol víctima directa de femicidio frustrado</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p><strong>Marisol, víctima de femicidio frustrado.</strong> Una mujer de 34 años presenta tres denuncias entre 2027 y 2028, la medida cautelar vence sin que ella lo sepa y en 2029 sufre un femicidio frustrado. Su información queda en once sistemas y al menos siete instituciones, que el Cuadro 1 detalla. Se apoya en la Ley 21.675 y su sistema integrado (SIIVG) como precedente de registro unificado.</p></div>
+          </div></div>
+        </div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#recomendaciones">
+            <span class="idx-num">P7</span><span class="idx-name">Recomendaciones</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p><strong>Clasificación:</strong> hoy cada institución decide si el dato es sensible, así que un mismo caso puede tratarse distinto. Se propone fijar la sensibilidad de antemano y para todas.</p><p><strong>Acceso:</strong> las causales de reserva, pensadas para proteger de terceros, pueden usarse contra la víctima que pide sus propios datos, y los caminos de reclamo varían según la institución. Se propone prohibir la reserva frente a la titular.</p><p><strong>Trazabilidad:</strong> la interoperabilidad se organiza por institución y convenios, y no deja huella de quién vio qué. Se propone un registro único generado por la capa de interoperabilidad, con dos lecturas de la misma fuente, una en lenguaje claro para la víctima y otra para los funcionarios.</p></div>
+          </div></div>
+        </div>
+
+        <div class="idx-item">
+          <a class="idx-item-head" href="#conclusiones">
+            <span class="idx-num">P8</span><span class="idx-name">Conclusiones</span>
+          </a>
+          <div class="idx-detail"><div class="idx-detail-in"><span></span>
+            <div class="idx-sum fs-box"><p><strong>Conclusiones.</strong> La dispersión de registros es la forma que toma la respuesta del Estado. El problema está en que la ley deja sin resolver clasificación, acceso y trazabilidad, de modo que sobre un mismo caso conviven criterios distintos. Las tres recomendaciones pueden aplicarse por separado, pero funcionan mejor juntas, y la tercera es la más estructural porque apoya a las otras dos.</p></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EDITORIAL ===================== -->
+  <section class="page" id="editorial">
+    <div class="page-label">Editorial | Serie Policy Brief</div>
+    <div class="page-intro">
+      <h2 class="page-lead">Data Justa examina cómo el Estado chileno registra, organiza y usa la información sobre víctimas de violaciones a los derechos humanos, y traduce sus hallazgos en recomendaciones claras para las políticas públicas.</h2>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <p>El Núcleo Milenio de Investigación en Producción y Uso Estatal de Datos sobre Severas Violaciones a Derechos Humanos (<em>Data Justa</em>) estudia las infraestructuras de conocimiento con las que el Estado registra y gestiona información sobre víctimas, y con las que orienta su asistencia. Trabaja con teorías críticas, métodos etnográficos, estudios de ciencia y tecnología, de derechos humanos y estudios críticos de datos.</p>
+        <p>Uno de sus compromisos es convertir la evidencia y los hallazgos en recomendaciones claras y accesibles para mejorar el diseño, la implementación y la evaluación de las políticas públicas, tanto en lo normativo como en lo práctico.</p>
+        <p>La Serie Policy Briefs es el vehículo para llevar esos hallazgos a las decisiones públicas. Busca abrir un espacio de reflexividad donde los registros estatales dialoguen con la rendición de cuentas, la protección de los derechos humanos y la justicia de datos. Sigue los casos de estudio del Núcleo: trata de personas, femicidio frustrado y violencia institucional.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">A quién se dirige<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Áreas de contenido<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Sobre la serie<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel lg fs-box">
+            <p>La Serie se dirige a un público amplio, nacional e internacional. En Chile, dialoga con los funcionarios en los distintos poderes del Estado (Ejecutivo, Legislativo y Judicial), órganos autónomos, gobiernos regionales y municipios, y tanto a sus autoridades como a los equipos que específicamente registran y usan los datos de la ciudadanía en su trabajo cotidiano. Se dirige también a centros de pensamiento, universidades, organismos intermedios y organizaciones de la sociedad civil, en especial a las organizaciones de víctimas y de derechos humanos, a quienes concebimos como interlocutoras y no solo como destinatarias. En el plano internacional, busca dialogar con los sistemas de protección de derechos humanos, organismos multilaterales, autoridades de protección de datos y redes académicas que enfrentan desafíos similares, para quienes la experiencia chilena puede ofrecer insumos comparados.</p>
+          </div>
+          <div class="panel lg fs-box">
+            <p>Los contenidos que la Serie se compromete a trabajar se ordenan en dos áreas. La primera atiende a las condiciones normativas y técnicas de los datos estatales sobre severas vulneraciones a las personas. Aquí se examinan los desafíos que la nueva Ley N° 21.719 impone a los registros administrativos que capturan información personal, y la necesidad de protocolos de cumplimiento específicos cuando esos registros documentan graves violaciones a los derechos humanos. También abordamos los registros de víctimas como infraestructura democrática, es decir, como una dimensión constitutiva de la responsabilización estatal y por lo tanto, esencial para sostener la legitimidad del Estado en esta labor corresponde a la construcción  de una arquitectura de datos humanitarios que, junto a mecanismos de gobernanza interinstitucional, haga posible una coordinación intersectorial que hoy suele quedarse en lo declarativo cuando cada institución registra en sistemas independientes y sin estándares comunes.</p>
+        <p>La segunda área se desplaza desde los sistemas de información hacia las personas vulneradas. Por una parte, reflexionamos sobre la calidad de la respuesta estatal a las víctimas de femicidio frustrado, trata de personas y violencia institucional, que no puede evaluarse solo por la existencia de servicios sino por su capacidad de alcanzar a quienes son más afectadas -sin reproducir las asimetrías de género, clase y origen que estructuran las propias vulneraciones. Por otra parte, el cuidado de los equipos que intervienen con esas víctimas, entendido como variable de calidad de la política pública. Acá consideramos que la exposición sostenida al sufrimiento deteriora la capacidad de intervención, provoca rotación de personal especializado y erosiona la memoria institucional acumulada en los servicios, por tanto, su consideración dentro de la propia política pública debe ser tenida como un aspecto central y no accesorio.<p>
+          </div>
+          <div class="panel lg fs-box">
+            <p>En conjunto, los Policy Briefs sostienen una idea que atraviesa el trabajo de Data Justa: los registros estatales no son un soporte neutral de la política pública, sino una de las formas en que el Estado decide qué daño reconoce, a quién considera víctima y qué respuesta le debe. Cada Policy Brief tomará hallazgos que consideramos imprescindibles y los devuelve al debate público con recomendaciones situadas, viables y alcanzables. En efecto, no se trata sólo de agregar exigencias técnicas al aparato estatal, sino evidenciar que en las decisiones aparentemente administrativas existe la posibilidad de que la intervención estatal sea efectiva. Al poner la evidencia científica y la reflexión interdisciplinar a disposición de quienes legislan, diseñan, implementan y evalúan, la serie asume que la justicia de datos es un horizonte concreto y plausible, dado que instala reflexividad en las prácticas con que el Estado nombra, organiza  y responde.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+  <!-- ===================== RESUMEN ===================== -->
+  <section class="page" id="resumen">
+    <div class="page-label">Resumen ejecutivo</div>
+    <div class="page-intro">
+      <h2 class="page-lead">Los registros del Estado sobre víctimas de severas vulneraciones son a la vez la huella de sus fallas y la base para responderles. La Ley 21.719 abre la oportunidad de tratarlos como datos sensibles, trazables y accesibles para sus titulares.</h2>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <p>La entrada en vigencia de la Ley N° 21.719 reforma íntegramente la Ley N° 19.628 y crea la Agencia de Protección de Datos Personales. Todos los registros administrativos del Estado deberán ajustarse a un estándar de tratamiento de datos que Chile no había conocido: principios exigibles, derechos ejercitables, un órgano fiscalizador con potestad sancionatoria y responsabilidad personal de las jefaturas de servicio. Esta coyuntura representa una oportunidad para considerar específicamente la protección de datos personales sobre violación de derechos humanos y severas vulneraciones, como registros sensibles que demandan trazabilidad mediante regímenes de interoperabilidad y garantías de efectivo acceso a quienes son los titulares de los datos.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">Se sostiene que<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Tres Recomendaciones<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">A quién se dirige<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">¿Qué es lo nuevo?<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel fs-box">
+            <p>Las infraestructuras de registro estatales sobre violaciones de los derechos humanos y severas vulneraciones no son un tipo de dato más dentro de la administración del Estado. El titular del dato es una persona a quien el Estado no logró proteger o a quien el propio Estado dañó. Así, este tipo de datos puede ser leído en estas dos dimensiones: los datos de la persona dañada constituyen el registro mismo de las fallas del Estado y, a la vez, es sobre esos datos que el propio Estado debe responder para garantizar el ejercicio de derechos de estas personas en tanto víctimas. En consecuencia un Estado que potencialmente -por falta de cuidado y resguardo- puede perder, filtrar, calificar mal o fragmentar la información de una víctima replica o amplifica las formas de violencia original. Por el contrario, un tratamiento de datos adecuado y pertinente (accesible, exacto, trazable y seguro), puede servir como medio y condición para avanzar en la reparación del daño causado.</p>
+           
+          </div>
+          <div class="panel fs-box"><p>Proponemos tres recomendaciones que no implican modificaciones normativas a la Ley 21.719, sino asuntos de implementación por parte del Estado. Entre estas recomendaciones establecemos: (1) la clasificación prioritaria por defecto para los registros personales de graves vulneraciones a los derechos humanos (como dato sensible), sin que esto tenga que ser evaluado por cada institución que sostenga este tipo de registros; (2) respecto del acceso a la información, prohibir el uso de reserva cuando se trate de la propia víctima quien solicite la información; (3) consolidar la trazabilidad del acceso a la información tanto para la propia víctima como para las instituciones del Estado que deben informarse del caso, en un formato único y con aseguramiento de que sea reflejo de la interoperabilidad.</p></div>
+          <div class="panel fs-box"><p>El documento está dirigido tanto a funcionarios públicos, especialmente aquellos que pueden ser responsables de la implementación de la Ley 21.719, como también para organizaciones de la sociedad civil, preocupados tanto por los derechos digitales de personas especialmente vulnerables -como son las víctimas de severas vulneraciones a los derechos humanos-, como también a las organizaciones de derechos humanos en general que dialogan e interactúan constantemente con el Estado.</p></div>
+          <div class="panel fs-box"><p><strong>Principales características de la ley de protección de datos ¿qué es lo nuevo?</strong><p>La nueva Ley 21.719 actualiza, amplía y sistematiza de manera integral los derechos de los titulares de datos personales. Estos derechos, conocidos comúnmente en el ámbito de la privacidad como derechos "ARCOP" (Acceso, Rectificación, Cancelación/Supresión, Oposición y Portabilidad), junto con el de Bloqueo, son personales, intransferibles e irrenunciables, y no pueden ser limitados por ningún acto o convención.</p></div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+  <!-- ===================== INTRODUCCIÓN ===================== -->
+  <section class="page" id="introduccion">
+    <div class="page-label">Introducción</div>
+    <div class="page-intro">
+      <h2 class="page-lead">La Ley 21.719 entra en vigencia el 1 de diciembre de 2026. Más que cumplir una norma, es una oportunidad para que las instituciones miren sus registros como el rastro de personas a quienes el Estado no logró proteger, o a quienes dañó.</h2>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <p>La entrada en vigencia de la Ley 21.719, el 1 de diciembre de 2026, obliga a todas las instituciones del Estado a revisar la forma en que registran, almacenan, comunican y resguardan los datos personales que administran. Este Policy Brief busca acompañar ese proceso en un ámbito específico: el de las instituciones que registran datos de víctimas de violaciones a los derechos humanos y de severas vulneraciones. Para ellas, responder a las exigencias de la nueva Ley no se agota en elaborar inventarios, conformar comités o actualizar políticas de privacidad. Supone, sobre todo, mirar sus propios registros de un modo sensible, reconociendo que detrás de cada parte policial, ficha de atención o carpeta investigativa hay una persona que el Estado no logró proteger o que fue dañada por él por omisión u acción directa. Estos registros y datos, además, son la base para que el Estado desempeñe las obligaciones que le asisten sobre la intervención con este tipo de personas afectadas.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">Se sostiene que<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Marisol y Nudos Críticos<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Derechos personales<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel fs-box">
+            <p>La implementación de la Ley 21.719 no debería leerse únicamente como un ejercicio de cumplimiento normativo. Es también una oportunidad para profundizar en el ejercicio de los derechos que asisten a las víctimas en tanto titulares de sus datos. Esto comprende tanto los derechos que consagra esta Ley (acceso, rectificación, supresión, oposición, portabilidad y bloqueo) como aquellos que ya reconocen otros cuerpos normativos. Destaca en particular la Ley 21.675, que establece garantías específicas para las mujeres víctimas de violencia de género respecto de su participación en el proceso penal y del acceso a la información sobre su propio caso. Leídas en conjunto, estas normas permiten plantear una pregunta: ¿qué tareas le asisten a las instituciones del Estado cuando los datos que custodian son, al mismo tiempo, el registro del daño sufrido por una persona y la base sobre la cual el Estado debe responder?</p>
+             <p class="footnote"><sup>1</sup> Se incluyen en el análisis, y se señala explícitamente cuando corresponda, la Ley Nº 20.285 sobre acceso a la información pública que delimita qué parte de la información en poder del Estado es pública, cuál pertenece solo a su titular y de qué forma se puede acceder a ella. También se incluye la Ley 21.180 sobre transformación digital del Estado, junto con sus normas de implementación. Entre estas destacan el Decreto Supremo Nº 4 de 2020, que regula la forma en que los procedimientos administrativos deben expresarse por medios electrónicos, y el Decreto Supremo Nº 12 de 2023, que establece la Norma Técnica de Interoperabilidad.</p>
+          </div>
+          <div class="panel fs-box"><p>Para hacer concreta esta pregunta, el documento recurre a un caso ficticio de violencia de género. Se trata del caso de Marisol y su historial de violencia de género hasta culminar con un hecho de femicidio frustrado. Su recorrido permite observar cómo un mismo hecho queda registrado en distintas instituciones (policía, fiscalía, tribunales, salud, entre otras), cada una con sus propios sistemas, criterios y finalidades. A partir de ese recorrido se identifican tres nudos críticos sobre cómo deberían administrarse estos registros en el contexto de la Ley 21.719:
+</p><p><strong>Primero:</strong> clasificación. Es decir, quién y cómo determina que estos datos corresponden a datos sensibles.</p><p><strong>Segundo:</strong> acceso, qué garantías tiene la persona titular para conocer los registros que el Estado mantiene sobre ella.</p><p><strong>Tercero:</strong> interoperabilidad mediante el cual estos registros circulan entre instituciones. Para servir tanto al Estado como a la víctima, ese régimen debe ser trazable.</p><p>Así, las recomendaciones buscan contribuir a la implementación de la Ley 21.719 en un momento en que las instituciones están definiendo sus protocolos y procedimientos para anticiparse a la puesta en marcha de la Ley. Es esperable, por tanto, que la propia implementación haga surgir desafíos que estas recomendaciones no logran visualizar cabalmente. Esos desafíos pueden provenir de las capacidades dispares de las instituciones, de los criterios que adopte la Agencia de Protección de Datos Personales o de la experiencia de las propias víctimas al ejercer sus derechos. En este sentido, las recomendaciones permiten avanzar en la clasificación, el acceso y la trazabilidad de estos registros, pero no se formulan como soluciones definitivas. Se trata más bien de orientaciones que deberán revisarse a la luz de lo que la práctica reflexionada vaya mostrando en la implementación de la propia Ley.</p></div>
+          <div class="panel fs-box"><p><strong>Derechos de las personas dentro de la Ley 21.719</strong><p>
+
+Entre los derechos concebidos en la Ley son personales, intransferibles e irrenunciables. Entre ellos están el Acceso, Rectificación, Supresión, Oposición, Portabilidad y Bloqueo. Destacamos Acceso y Rectificación.
+
+Acceso: Es el derecho que permite al titular solicitar y obtener confirmación de si el responsable está tratando sus datos personales, acceder a ellos y obtener información detallada sobre dicho tratamiento. Entre las cuales se comprende; el origen de los datos; finalidades específicas; identidad de los destinatarios a quienes se les ha comunicado o cedido los datos; periodo de tiempo durante el cual serán tratados los datos; los intereses del responsable que trata los datos; la lógica aplicada en caso que se realicen decisiones individuales automatizadas.
+
+Rectificación: Faculta al titular a solicitar y obtener del responsable la modificación o complementación de sus datos personales cuando estos sean inexactos, desactualizados o incompletos. Una vez rectificados, el responsable del tratamiento de los datos debe comunicar estas modificaciones a todas las personas o entidades a las que previamente les haya comunicado o cedido los datos. </p></div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+  <!-- ===================== MARISOL ===================== -->
+  <section class="page" id="marisol">
+    <div class="page-label">Marisol, víctima directa de femicidio frustrado</div>
+    <div class="page-intro">
+      <h2 class="page-lead">Marisol presentó tres denuncias y sobrevivió a un femicidio frustrado. Su información quedó repartida en once sistemas y en al menos siete instituciones del Estado.</h2>
+      <p class="page-note">Este caso es ficticio y fue construido con fines ilustrativos. Los hechos, nombres, fechas y respuestas institucionales son producto de la ficción.</p>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <p>Marisol Aguilera Pinto tiene 34 años y vive en Linares, Región del Maule. Trabaja como técnica en enfermería en un consultorio y cría sola a su hija de nueve años. Entre 2027 y 2028 presentó tres denuncias contra su expareja. La primera fue en marzo de 2027, en la 2ª Comisaría, por amenazas. Un carabinero recibió la denuncia y escribió el parte, aplicó la pauta unificada de evaluación de riesgo y derivó su caso al Ministerio Público. La causa terminó archivada provisionalmente cuatro meses después. La segunda denuncia fue en enero de 2028, también por amenazas, esta vez con capturas de pantalla de mensajes que fueron adjuntadas al parte policial. La tercera denuncia fue en noviembre de 2028, por lesiones leves. Esta vez hubo constatación de lesiones en el servicio de urgencia, su denuncia fue investigada por fiscalía, y además hubo una medida cautelar de prohibición de acercamiento que duraba noventa días. Al cumplirse el plazo, esta medida no se renovó y Marisol no se enteró de esto.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">La historia<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">El caso Ley 21.675<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel fs-box">
+            <p>En marzo de 2029 su expareja la atacó con un arma blanca en la vía pública. El ataque ocurrió a las 19:40, a dos cuadras de la casa de su madre. Marisol sobrevivió gracias a que dos vecinos intervinieron. Estuvo once días hospitalizada. La denuncia por estos hechos y su causa en investigación fueron tipificados como femicidio frustrado. El Circuito Intersectorial de Femicidio (<span class="sc">CIF</span>) activó el caso al día siguiente; se contactaron con ella desde el Programa Apoyo a Víctimas (<span class="sc">PAV</span>) y el Servicio Nacional de la Mujer y Equidad de Género (<span class="sc">SERNAMEG</span>), entregaron prestaciones psicosociales y jurídicas, respectivamente. SernamEG actuó como querellante además en la causa por femicidio frustrado. Luego de la investigación desarrollada por Fiscalía y el juzgamiento en tribunales, la condena llegó en noviembre de 2029 y terminó con 13 años de cárcel para su expareja, quién podría salir en libertad el año 2042.</p>
+            <p>En esta historia de violencia de género, que se asemeja bastante a la de 1.762 mujeres que han sido víctimas de femicidio frustrado entre los años 2014 y 2024 en el país (Circuito Intersectorial de Femicidio [<span class="sc">CIF</span>], 2025). Los registros de Marisol en el Estado, así como el mujeres que son víctima de femicidio frustrado, quedan evidenciados y diseminados en distintas instituciones del Estado que tienen competencia en materia de denuncia, investigación, juzgamiento y apoyo psicológico, social y jurídico frente a un hecho como el de Marisol. En el caso específico de ella, sus registros y datos quedan inscritos en once sistemas y soportes de registro diferentes y en al menos siete instituciones del Estado. En el cuadro 1 se puede observar estos registros a nivel de institución, sistema/soporte, el tratamiento que se hace del dato en cada institución y contexto del uso del dato.</p>
+          </div>
+          <div class="panel fs-box"><p><strong>Ley 21.675, el Estado ya ha legislado sobre registros de víctimas de vulneraciones graves</strong><p>
+
+Esta Ley contiene un conjunto acotado pero significativo de disposiciones sobre datos personales que anticipan —y en algunos puntos exceden— el estándar general que se establece en la Ley 21.719.
+El artículo 26, faculta al Ministerio de la Mujer y la Equidad de Género [<span class="sc">MMEG</span>] para crear y administrar el SIIVG (Sistema Integrado de Información sobre Violencia de Género), que debe ser "seguro, interoperable, de fácil acceso y encontrarse actualizado". Su primer objetivo es un expediente único de organización de datos personales que permita levantar alertas tempranas; el segundo, proveer información para priorizar la atención según nivel de riesgo; el tercero, generar información anonimizada con fines estadísticos.
+</p></div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+  <!-- ===================== RECOMENDACIONES ===================== -->
+  <section class="page" id="recomendaciones">
+    <div class="page-label">Recomendaciones</div>
+    <div class="page-intro">
+      <h2 class="page-lead">Tres nudos críticos, cada uno con una recomendación, para que el Estado administre los registros de víctimas de severas vulneraciones en el contexto de la Ley 21.719.</h2>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <p>El caso ficticio de Marisol ilustra cómo graves vulneraciones a los derechos humanos, como la violencia de género, dejan huella en las instituciones del Estado: se vincula con al menos siete instituciones y genera registro en doce sistemas distintos. Esta dispersión no es un problema en sí misma, pues un caso grave debe pasar por policía, salud, fiscalía, tribunales, circuitos intersectoriales y programas de reparación, y cada institución debe registrar lo que hace en cumplimiento de su rol. El problema surge bajo la nueva Ley 21.719 de protección de datos, que deja a cada institución la determinación de la sensibilidad del dato que custodia, mantiene causales de reserva que no distinguen entre un tercero y la propia víctima (titular de sus datos) y no exige requisitos específicos para consolidar un régimen de interoperabilidad. Así, sobre un mismo caso pueden convivir criterios dispares de sensibilidad y de acceso, e interoperabilidad ad hoc entre instituciones, pero no necesariamente para la víctima. Las tres recomendaciones buscan corregir estos nudos críticos.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">Respecto a<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Nudo–Recomendación 1<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Nudo–Recomendación 2<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Nudo–Recomendación 3<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Protección de datos<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel fs-box">
+            <p>Cada una de las tres recomendaciones que siguen se presenta como la traducción normativa de un nudo crítico previamente identificado, utilizando como ejemplo y referencia el caso de Marisol. El análisis y la recomendación buscan establecer medidas concretas, atendibles y alcanzables en el contexto de la implementación de la Ley 21.719, las cuales pueden aplicarse de forma particular por una institución como también por el conjunto del Estado; ciertamente, su alcance e impacto es mayor en la medida que su aplicación sea sobre el conjunto de las instituciones del Estado que registran información sobre víctimas de violaciones a los derechos humanos y de severas vulneraciones. Pero no eximen que dichas recomendaciones puedan ser adoptadas de manera particular considerando que las instituciones tienen capacidades y recursos diferentes para hacerse cargo de la implementación de la mencionada Ley.</p>
+            <p>Por otra parte, si bien el foco de los nudos y recomendaciones está en la implementación de la Ley 21.719, estos se formulan considerando otros cuerpos normativos que se vinculan directamente con ella en su implementación. Se trata de la Ley 20.285 sobre acceso a la información pública; la Ley 21.675, que estatuye medidas para prevenir, sancionar y erradicar la violencia en contra de las mujeres en razón de su género; y la Ley 21.180 sobre transformación digital del Estado, junto con sus normas de implementación. Entre estas destacan el Decreto Supremo N.º 4 de 2020, que regula la forma en que los procedimientos administrativos deben expresarse por medios electrónicos, y el Decreto Supremo N.º 12 de 2023, que establece la Norma Técnica de Interoperabilidad. Cada una responde a una pregunta que la Ley 21.719 no resuelve por sí misma. La Ley 20.285 delimita qué parte de la información en poder del Estado es pública y cuál pertenece solo a su titular, y de qué forma puede acceder. La Ley 21.675 fija los deberes del Estado hacia la titular cuando es una mujer víctima de violencia, así como otra medidas para la integración de este tipo de información. La Ley 21.180 define la infraestructura por la que los datos circulan entre órganos públicos, especialmente bajo la noción de interoperabilidad. De este modo, leídas en conjunto, conforman el marco en que un registro de víctimas puede clasificarse de forma sensible, abrirse a su titular en virtud de sus derechos y dejar trazabilidad de su uso entre las instituciones.</p>
+            <p>Respecto de los nudos y recomendaciones. El primero aborda los criterios que cada institución debería tener en cuenta para clasificar el registro de víctimas como datos sensibles, y la criticidad que esto comporta cuando esto debe ser decidido por cada institución en particular -pese a que se trate de un mismo caso; la recomendación propone una clasificación prioritaria por defecto para los registros personales de graves vulneraciones a los derechos humanos, fijada de manera general y externa a cada institución, de modo que los mecanismos de protección sean a la persona y el hecho victimizante, y no a los distintos tipos de sistemas que custodian el dato. El segundo nudo es que las reglas de reserva, concebidas para proteger a la víctima frente a terceros, podrían terminar invocándose para negarle acceso a su propio registro; la recomendación propone prohibir expresamente ese uso, dejando la reserva como regla de oponibilidad frente a terceros y nunca frente al titular de los datos. El tercer nudo es que el dato circula entre instituciones sobre un régimen de interoperabilidad que es generado por cada institución; la recomendación propone consolidar la trazabilidad en un formato único, legible tanto por la víctima como por las instituciones que deben informarse del caso, y generado por la misma capa que hace circular los datos, de manera que sea reflejo fiel de un régimen de interoperabilidad que sirva a las instituciones y a las víctimas por igual. Las tres recomendaciones pueden implementarse por separado, aun cuando la relación lógica entre las tres es clara. Especialmente considerando la tercera recomendación, que tiene un carácter más estructural dado que facilita el cumplimiento de las dos primeras recomendaciones.</p>
+          </div>
+          <div class="panel fs-box"><p><strong>Que la definición de sensibilidad no dependa de quien custodia el dato</strong><p>En la Guía Práctica de la Secretaría de Gobierno Digital se recomienda la elaboración de protocolos, reglas y procedimientos "priorizando aquellos que atiendan directamente a los principales riesgos identificados por el Comité [ejecutivo] en base al informe de hallazgos". Dicho informe opera como sistematización de las categorías de información que administra y si posee -o no- datos personales que puedan ser clasificados como sensibles. En base a ello se aplicará el régimen de licitud, las exigencias de seguridad y los deberes de cumplimiento a los cuales las instituciones estarán obligadas. Así, es el Comité la instancia ejecutiva que -integrada por distintas áreas de la institución- deberá determinar acciones estratégicas derivadas del informe de hallazgos. Dichas acciones deben estar ancladas a los deberes de cumplimiento del artículo 14 de la Ley, en materias como política de privacidad, detalle de tratamiento de los datos, medidas de seguridad, canales de atención, entre otros. Así, las acciones a desarrollar no sólo deberían considerar el riesgo de incumplimiento de la institución frente a estos ámbitos, sino también, desde el punto de vista de la sensibilidad de los datos -cuando se trata de registros sobre personas afectadas por severas vulneraciones de derechos humanos-, que estos registros no constituyan un recurso para otras formas de victimización.</p><p>
+En la medida que la clasificación sobre la sensibilidad del dato personal es evaluado por cada institución de forma separada, en el caso de Marisol, podría ocurrir que en el marco de la Ley 21.719 algunas instituciones podrían establecer como sensibles sus datos y otras no lo hicieran igual. Es decir, llegar a una determinación distinta sobre la clasificación de la sensibilidad. Si bien, para el caso del registro en el SIIVG, en el artículo 27 de la Ley 21.675, se indica que los datos de las víctimas registrados son sensibles “para todos los efectos legales”, en otras instituciones como en las policías, Ministerio Público o Poder Judicial, esto debe ser declarado por medio de cada informe de hallazgos. A lo anterior se le suma el propio diagnóstico que hace Verónica Achá sobre las capacidades de las instituciones del Estado para dar cumplimiento a nuevas normas en materia de protección de datos. Pone el ejemplo de la Ley de Transformación Digital (Ley Nº 21.180), donde se reconoció explícitamente la heterogeneidad del Estado y se establecieron plazos diferenciados de cumplimiento y exigencias distintas según tres grupos de instituciones (A, B y C) en virtud de sus recursos y competencias (Achá, 2026). Complementa, que esta misma asimetría se verá reflejada en la implementación de la Ley 21.719, pero sin que se reconozcan las capacidades y recursos diferenciados de las instituciones. Así, cabe preguntarse si los mismos datos en diferentes instituciones serán tratados de la misma forma al momento de establecer su sensibilidad. Si los mismos registros de Marisol, y los distintos hitos en su historial de violencia de género, serán clasificados de la misma forma (como sensibles) desde Carabineros hasta el Poder Judicial.</p><p>De ahí que la recomendación sea establecer, de manera general y ex ante, que los registros personales sobre víctimas de severas vulneraciones a los derechos humanos se consideren datos sensibles en todas las instituciones que los traten, con independencia del sistema en que se alojen. Para que esta clasificación sea operable, la categoría debe delimitarse con precisión, comenzando por los hechos victimizantes como los de femicidio frustrado -y extendiéndose a aquellos que comparten una raíz común como es la violencia de por motivos de género, por ejemplo-. Como se mencionó, la Ley 21.675 ofrece un argumento directo en su artículo 27. La recomendación busca que esa calificación acompañe al dato desde su origen, y no solo cuando llega al SIIVG. En la práctica, el informe de hallazgos de cada institución no tendría que deliberar si estos registros son sensibles, sino partir de esa calificación como un piso común. Esta definición podría fijarse mediante una instrucción general de la Agencia de Protección de Datos Personales o una actualización de la Guía Práctica de la Secretaría de Gobierno Digital.</p><p class="footnote"><sup>2</sup> El informe de hallazgos, a nivel de detalle, está conformado por el levantamiento de 16 puntos clave sobre los registros administrativos de cada institución: incluyendo categorías de datos tratados, finalidades, bases legales, destinatarios, transferencias internacionales, los riesgos detectados en el procesamiento y, especialmente, si se trata de datos sensibles.</p></div>
+          <div class="panel fs-box"><p><strong>Que la reserva de datos nunca sea contra la persona víctima</strong><p>La Guía Práctica de la Secretaría de Gobierno Digital recomienda que el canal para el ejercicio de los derechos de los titulares sea, en el sector público, la Oficina de Informaciones, Reclamos y Sugerencias (OIRS) de cada institución. La OIRS es, además, el canal construido para la Ley 20.285 (de transparencia y acceso a información pública), de modo que encauzar por ahí una solicitud sobre los propios datos implica causales de reserva diseñadas para proteger a terceros de la publicidad: es decir, si una víctima -que pregunta por sus propios registros- se le podría denegar acceso invocando el derecho de las personas vinculado a la seguridad y la vida privada (Art. 21). Esto revela que el acceso a la información es en efecto un trámite administrativo estándar y que opera de modo genérico. En este sentido, comprendiendo que los registros de víctimas de severas vulneraciones a los derechos humanos están afectos a ser solicitados por medio de la OIRS, considerado este como un canal único y genérico, se debe presentar atención al conjunto de causales de denegación y reserva de información que pueden operar una vez que una solicitud ingresa como requerimiento al Estado.</p><p>
+
+La Ley que regula la protección de datos personales en Chile —la Ley 19.628, tal como quedó tras la reforma con la Ley 21.719— le reconoce a cualquier persona el derecho a preguntarle al Estado qué información tiene sobre ella. Pero su artículo 23 agrega excepciones. Un organismo público no entregará información cuando hacerlo dificulte sus funciones de fiscalizar, investigar, sancionar o proteger a víctimas y testigos, o cuando se trate de información que otra ley declara secreta. Vale la pena detenerse en la redacción al respecto, ya que la Ley no dice que el organismo podrá evaluar si conviene entregarla, dice que no la entregará. Es una instrucción, no una ponderación que tensiona el acceso. Así, la excepción que existe para cuidar a las víctimas está redactada de un modo que permite usarla para negarle información a la propia víctima que la pide sobre su propio caso o conjunto de registros.</p><p>
+
+La misma Ley 21.719 contiene otras dos reglas que cubren tramos distintos del recorrido de una víctima por el Estado. El artículo 24 saca del régimen común los datos sensibles que se tratan con fines de investigación penal, y también los que están protegidos por normas de secreto: para ellos rige un régimen especial cuyo contenido queda entregado a cada ley sectorial, con lo cual la respuesta depende de qué institución tenga el dato. El artículo 25, por otra parte, declara reservados los datos sobre delitos y prohíbe comunicarlos "a terceras personas", sin decir en ninguna parte que la víctima no es una tercera persona respecto de un registro que trata sobre ella misma. Algo parecido ocurre en la Ley para Prevenir, Sancionar y Erradicar la Violencia de Género (Ley 21.675). Su artículo 28 impone reserva y secreto absoluto sobre el Sistema Integrado de Información sobre Violencia de Género (SIIVG), y regula el acceso respondiendo la pregunta sobre ¿qué funcionarios pueden consultarlo? La pregunta por si una mujer víctima de violencia registrada en ese sistema puede saber qué contiene simplemente no está formulada.</p><p>
+
+Esto ciertamente está tensionado por otros artículos en esta misma Ley 21.675, que establecen garantías para que las víctimas puedan participar del proceso penal y saber en qué estado va la investigación judicial (Art. 30). De modo que la víctima puede pedir información “personalmente, sin necesidad de requerirla a través de un abogado o abogada” (Art. 32), con todos los derechos sobre su propia información -según los derechos contemplados en la Ley de datos personales- ¿Qué sucede en el caso de Marisol y sus registros? Registros como las distintas denuncias, constatación de lesiones, medidas de protección, sus plazos, carpeta investigativa, antecedentes de sobre el imputado, entre otros, están repartidos en al menos once sistemas de registro del Estado. Supongamos que hubiera preguntado sobre sus registros de su caso en el Estado. Primero, habría tenido que elegir porqué institución hacer la consulta (tendría al menos cinco alternativas), luego dirigirse a la OIRS correspondiente de la institución, donde su solicitud se mezcla con las de cualquier persona que pide información pública, y donde la primera pregunta que el organismo se hace es si entregarla afecta la seguridad o la vida privada de alguien. Si superaba ese filtro, la esperaba el artículo 23, con su instrucción de no entregar información cuando ello dificulte investigar o proteger a víctimas y testigos. Si la negativa venía de Carabineros, del SernamEG o del Servicio de Salud, Marisol podía reclamar ante la nueva Agencia de Protección de Datos. Si venía del Ministerio Público o el Poder Judicial, tendría que interponer un recurso de protección. Una misma pregunta, sobre un mismo caso, admite respuestas y caminos distintos.</p><p>
+
+Lo que muestra este ejemplo, es que el acceso a realizar la solicitud de información en ningún caso habilita a las instituciones a que puedan entregar registros administrativos que son sobre Marisol y su historia de violencia de género. No existen mecanismos explícitos que señalen la imposibilidad de imponer reserva de la información cuando sea la propia víctima quien solicite sus datos. Si bien se entiende que estas reservas efectivamente deben operar para proteger la información de las víctimas, sea de terceras personas como para asegurar las debidas diligencias en etapas de investigación y juzgamiento en el sistema de justicia, estas reservas nunca deberían operar para negar información a la propia víctima. Esto supone, en el ejemplo, que a Marisol no se le deberían aplicar las causales del artículo 23 (Ley 21.719), cuando quien pregunta es la persona sobre la cual versa el propio registro, de modo de precisar que “proteger a víctimas y testigos” significa protegerla de terceros y no de “ella misma”. En este mismo sentido, la recomendación general es que saber no debe depender de que Marisol -o cualquier otra víctima que pregunte por sus registros-, sepa qué tiene que preguntar y presuponer qué reservas de información debería sortear. Sino que frente a la pregunta de una víctima del tipo ¿qué registro tienen las instituciones del Estado sobre mí?, el Estado debería saber de antemano qué entregar y de qué forma hacerlo.</p></div>
+          <div class="panel fs-box"><p><strong>De la interoperabilidad a la trazabilidad única</strong><p>La Ley 21.719 en su artículo 21 consagra el principio de coordinación y exige a las distintas instituciones del Estado alcanzar “un grado alto de interoperabilidad y coherencia, de modo de evitar contradicciones en la información almacenada”. Este mandato normativo se ve acompañado de ciertos mecanismos de cumplimiento que establecen que las instituciones deben publicar mensualmente -en su sitio web- los convenios de cesión de datos que hayan suscritos con otras instituciones (Artículo 22).</p><p>
+No obstante, el sólo hecho de hacer público estos convenios no asegura en qué grado cada institución cumple con el universo de registros que deberían ser interoperables, ni qué nivel de interoperabilidad ha alcanzado con respecto a las instituciones con las cuales sí se tiene convenio. Por otro lado, Es importante, que la Ley 21.719 vea su implementación del régimen de interoperabilidad sobre la base de la Ley 21.180 sobre transformación digital (2019) que instó la digitalización de trámites y registros físicos, y el Decreto N.º 4 del 2021, que constituyó la obligatoriedad de contar con expedientes electrónicos y mantener un resguardo de los datos que se clasifiquen como sensibles con autorizaciones previas de la persona interesada. Del mismo modo, considerar también el Decreto N.º 12 del 2023, donde se definen los estándares, protocolos y componentes para la consolidación del intercambio -de forma directa, automatizada y segura- de datos. Es decir, el intercambio de ellos bajo una red de interoperabilidad centralizada en la Secretaría de Gobierno Digital radicada en el Ministerio de Hacienda.</p><p>
+
+Por otra parte, volviendo a los artículos 3 y 5 de la misma Ley 21.719, el titular de los datos debe poder saber cómo están siendo tratados, la finalidad o finalidades de su uso, y la lógica aplicada en caso de que los tratamientos se basen en lógicas automatizadas. Esto se cumple en la medida que cada institución, siguiendo la recomendación de la Guía Práctica de la Secretaría de Gobierno Digital, realice un inventario donde se registre y exponga sus actividades de tratamiento, las categorías de datos tratadas, la finalidad, base legal, a qué destinatarios comunica y qué medidas de seguridad aplica ¿Cómo se vincula esto en el régimen de la interoperabilidad? El inventario efectivamente puede dar luces sobre la comunicación entre instituciones, pero en ningún caso podría responder la pregunta sobre qué datos tiene la institución de las personas, ni cuáles están efectivamente siendo compartidos con otras instituciones. Saberlo implicaría -tal como se señala en el apartado anterior- preguntar en cada una de las instituciones por su régimen de interoperabilidad alcanzado en virtud de sus acuerdos firmados. Por otro lado, esto debería estar en complemento con la red de interoperabilidad establecida en el Decreto N.º 12, que se define como un modelo distribuido y centralizado que se estructura con nodos de interoperabilidad donde las instituciones pueden actuar como consumidoras, proveedoras o ambas. Es decir, cada institución puede aportar con su infraestructura a la red o bien utilizar la infraestructura ya dispuesta. Esto vendría a evitar que cada institución tenga que producir su propio régimen de interoperabilidad, pero como la Ley 21.719 es posterior y es una norma de rango legal superior al Decreto N.º 12 (el cuál además en anterior a la Ley 21.719), todas las reglas de cesión e interoperabilidad de datos que allí se indican deberán ser readecuadas o reemplazadas por un reglamento que será establecido una vez que la Ley ya entre en vigencia. De este modo, el régimen de interoperabilidad que se construya deberá ser hecho sobre la base de lo que la Ley 21.719.</p><p>
+
+Por otra parte, asimismo, es importante considerar lo que la Ley 21.675 consideró para avanzar en un régimen de interoperabilidad en materia de violencia de género. Al crear el SIIVG se estableció una unidad de observación y de registro clara: un expediente único por caso, alimentado por el intercambio electrónico entre instituciones, con alertas tempranas y priorización según nivel de riesgo. En este sentido, es una infraestructura de información para que el dato circule y se puedan tomar decisiones comprensivas sobre los casos. Algo similar ocurre con el artículo 49 de esta misma Ley, que impone al fiscal el deber de conocer todos los antecedentes relevantes del caso, incluidas las otras causas en tramitación o archivadas provisionalmente. En efecto, en ambos casos existe un deber de “integración” de distintos registros provenientes de distintas fuentes institucionales. En el caso del SIIG, basado en un régimen de interoperabilidad; en el caso del fiscal, de su capacidad de llevar las indagatorias de forma “omnisciente”. Sin embargo, el SIIVG, no se concibe como una infraestructura informática donde se pueda saber qué hizo cada institución con cada dato antes de que este llegue al SIIVG. Y para el fiscal, comprometido en medio de una investigación, este depende de los sistemas que tiene el Ministerio Público y el propio acceso al SIIVG, además de la propia capacidad humana de integrar y poner en relación toda la información. Así, su rol no es determinar el tratamiento que cada institución hizo de la información de la causa que esté investigando.</p><p>
+
+¿Qué sucede en el caso de Marisol? Su información e historia de violencia de género está repartida en once sistemas de registro distintos. En ellos no existen trazas ni registros de quién miró y analizó todos ellos. Si el fiscal que recibió la denuncia por lesiones pudo analizar las causas por amenazas que fueron archivadas previamente; si el carabinero que aplicó la pauta de evaluación de riesgo la misma noche en que se produjeron las agresiones tuvo a la vista previamente los partes de dichas amenazas previas; o si en el servicio de salud donde se constataron esas lesiones el servicio de urgencia tuvo a la vista el historial de denuncias. En este escenario, efectivamente un régimen de interoperabilidad plena que reúne la información al final de una serie de eventos (por ejemplo, en el SIIVG), puede ser importante para el sistema pero no necesariamente ser relevante para la víctima. Si bien la propia Ley 21.675 norma que los datos y registros disponibles que se encuentran dispersos, puedan ser reunidos, esto no necesariamente va de la mano con resolver en qué momento se reúnen y ni quien puede observar esos datos reunidos para tomar decisiones. En estos dos últimos aspectos, nos parecen indispensables de problematizar para proponer recomendaciones concretas.</p><p>
+
+De ahí que la recomendación general es consolidar la trazabilidad de los datos -en distintos momentos- como condición que le da sentido a un régimen de interoperabilidad que funcione en favor de las víctimas de severas vulneraciones de derechos humanos. En específico, primero, dicha trazabilidad se traduce en que la unidad sea la persona y su caso y que la capacidad de cada institución de poder armar su propio régimen de interoperabilidad sea un medio y no un fin en sí mismo. Sobre este punto, la elaboración del reglamento de interoperabilidad de la Ley 21.719 como también las propias recomendaciones que haga la Agencia de Protección de Datos que lo preceden, deberían tener muy en cuenta el tipo el tipo de infraestructura deseable para que la interoperabilidad entre instituciones se traduzca en este tipo de trazabilidad. Es por ello que la segunda dimensión de la recomendación es que la trazabilidad de los datos de la persona debe dejar su propia huella. Es decir, entregar información de quien ve y observa dicha información; las instituciones no solamente registran para adoptar decisiones (canalizar la denuncia, adoptar medidas de protección, investigar o juzgar), sino que deben hacerse igualmente responsables de utilizar la información y los datos ya registrados para fundar y tomar las mejores decisiones posibles en favor de las víctimas. Así, un régimen de interoperabilidad pleno que haga uso de un ecosistema de datos y registros reunidos, debe ser trazable tanto para quienes hacen uso de la información en el Estado como para la propia víctima que consulta sobre la información que el Estado tiene sobre ella. La consolidación de la trazabilidad de los datos en este régimen debe tener dos formas de lectura, pero basada en la misma fuente: una para la víctima, en lenguaje claro y administrable, que le permita saber qué instituciones tienen información sobre ella, quienes la han visto y porqué, qué medidas de protección, investigación y/o juzgamiento están vigentes y con qué plazos, etc. Y una segunda lectura, para los funcionarios, que deben informarse del caso de la forma más completa posible para el cumplimiento de su función y rol institucional. Que sirva -por ejemplo- al deber del fiscal de conocer los antecedentes previos, a favorecer las debidas diligencias que distintas normas exigen frente a las víctimas, y consolidar el rol del SIIVG respecto de la generación y uso de alertas tempranas para prevenir hechos de mayor violencia en materia de género que se encuentran establecidos en la Ley 21.675 (artículos 9 y 26). Sobre la base de estas orientaciones, sostenemos que se puede consolidar un régimen de interoperabilidad que sirva para la trazabilidad de los datos que sirva a la víctima y a las instituciones.  <p class="footnote"><sup>3</sup> Existen 4 niveles de interoperabilidad posibles, según la Unión Europea: (1) Básica, donde un sistema envía datos a través de una red, pero el receptor no interpreta ni procesa de forma automática la información recibida. Por ejemplo, a través del envío de planillas (o modalidad batch) que requieren intervención humana para leer y cargar datos de forma manual; (2) Estructural o sintáctica, donde el envío de información está precedido por un formato, sintaxis y estructura acordado. El receptor conoce de forma estandarizada campos y estructura del envío; (3) Semántica, donde no sólo se comparten datos en una estructura común sino también el significado exacto de la información, mediante el uso de vocabularios comunes, códigos y taxonomías que son entendidas por ambos sistemas (de envío y recepción); (4) Organizacional, donde las instituciones comparten procesos y flujos de trabajo comunes que permiten organizar metas u objetivos organizacionales a gran escala. Existen políticas de datos compartidas, con basamentos legales comunes y flujos de trabajo que integran distintas instituciones. Más detalles consultar: https://interoperable-europe.ec.europa.eu/collection/iopeu-monitoring/solution/european-interoperability-framework-eif-toolbox/levels-interoperability </p><p class="footnote"><sup>4</sup> Más detalles sobre la Secretaría de Gobierno Digital de Chile, en: https://digital.gob.cl/nosotros/ </p><p class="footnote"><sup>5</sup> Tras un informe previo de la Agencia de Protección de Datos Personales, un reglamento de implementación de interoperabilidad debería dictarse dentro de los seis meses siguientes a la entrada en vigor de la Ley.</p></div>
+          <div class="panel fs-box"><p><strong>Plazos de implementación de la Ley. Estado, reglamentos internos e interoperabilidad</strong><p>
+
+La implementación de la Ley 21.719 contempla un esquema de vigencia diferida y plazos de transición graduales para permitir que tanto el sector público como el privado se adapten a las nuevas exigencias de protección de datos. En concreto, la Ley entra en vigencia el 1 de diciembre de 2026; instituciones públicas como el Congreso, el Poder Judicial, la Contraloría, el Ministerio Público, el Banco Central, Servel y el Tribunal Constitucional a mediados del 2026, tenían plazo para la publicación de sus respectivas políticas, normas e instrucciones de control interno y seguridad. Por otro lado, un reglamento de interoperabilidad (Art. 26) deberá estar dictado a los 6 meses de entrada en vigencia de la Ley, luego de un informe con orientaciones de la Agencia de Protección de Datos Personales. Este regulará las condiciones y anonimización de datos para la comunicación de información entre organismos públicos (y hacia entidades privadas).</p></div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+  <!-- ===================== CONCLUSIONES ===================== -->
+  <section class="page" id="conclusiones">
+    <div class="page-label">Conclusiones</div>
+    <div class="page-intro">
+      <h2 class="page-lead">La dispersión de registros es la forma que toma la respuesta del Estado. El problema aparece cuando la Ley 21.719 deja sin resolver tres cosas: clasificación, acceso y trazabilidad.</h2>
+    </div>
+    <div class="page-body">
+      <div class="page-text">
+        <!-- REVISAR: este párrafo es idéntico al de la pestaña "Respecto a" de Recomendaciones (así venía en el diseño). -->
+        <p>El caso ficticio de Marisol buscó ilustrar cómo severas vulneraciones a los derechos humanos, como es la violencia por motivos de género, deja huella en las instituciones del Estado. El caso de Marisol se vincula con al menos siete instituciones y genera registro en doce sistemas distintos. Dichos registros no son un problema en sí mismo, puesto que un caso de violencia de género grave debe pasar por la policía, salud, fiscalía, tribunales, activaciones en circuitos intersectoriales, y programas de reparación, y cada institución -en el cumplimiento de su rol- debe registrar lo que hace. La dispersión de registros y datos, en este sentido, es la forma que toma la respuesta estatal. Lo que sí constituye un problema es lo que ocurre con esta dispersión bajo la nueva Ley 21.719 (de protección de datos), porque esta entrega a cada institución la determinación de qué tan sensible es el dato que custodia, mantiene causales de reserva que no distinguen entre un tercero y la propia víctima (que es titular de sus datos), y no exige que características específicas para la consolidación de un régimen de interoperabilidad. Sobre un mismo caso, entonces, pueden convivir distintos criterios de sensibilidad, disímiles criterios para acceder a la información personal y formas de interoperabilidad ad-hoc a las instituciones pero no necesariamente para la víctima. Las tres recomendaciones formuladas buscan orientar para corregir estos nudos que consideramos como críticos.</p>
+      </div>
+      <div class="tabs">
+        <ul class="tab-list">
+          <li><button type="button">Sobre el análisis<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Recomendación 1<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Recomendación 2<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Recomendación 3<svg class="ico"><use href="#arrow"/></svg></button></li>
+          <li><button type="button">Cierre<svg class="ico"><use href="#arrow"/></svg></button></li>
+        </ul>
+        <div class="tab-panels">
+          <div class="panel fs-box">
+            <p>El análisis no se apoyó únicamente en la Ley 21.719, a lo largo del documento se recurrió también a la Ley 21.675, que establece medidas para prevenir, sancionar y erradicar la violencia contra las mujeres. Su uso en el documento permitió abordar de forma más concreta la dispersión de registros en materia de violencia de género, mediante la referencia a la creación del Sistema Integrado de Información sobre Violencia de Género (<span class="sc">SIIVG</span>), que señala la creación de un expediente único de caso alimentado por intercambio de información entre las distintas instituciones que intervienen, y con capacidad de generar alertas tempranas según niveles de riesgo. Esta Ley es un precedente normativo muy relevante porque señala expresamente la necesidad de que el Estado cuente con infraestructuras de información integradas y no simplemente conectadas o coordinadas entre sí. El segundo uso de esta Ley en el documento dice relación con que ella establece garantías más explícitas sobre el derecho que tiene la víctima sobre su propia información; desde la declaración de “sensibilidad”, su participación en el proceso penal; como por el derecho que tiene a pedir información personalmente. El uso de esta Ley permitió analizar con más precisión los nudos que se establecieron como críticos dentro del cumplimiento de la Ley 21.719.</p>
+          </div>
+          <div class="panel fs-box"><p>La primera recomendación es que la clasificación sobre el carácter sensible de estos registros no quede entregada a lo que cada institución concluye en su propio informe de hallazgos. Cuando se trata de registros de personas afectadas por vulneraciones graves a los derechos humanos, la categoría debería fijarse de antemano y de manera general, por vía reglamentaria o por instrucción de la Agencia de Protección de Datos. La recomendación aborda el hecho de que cada institución debe deliberar si los datos sobre víctimas de severas vulneraciones son o no “sensibles”. Por el contrario, fijarlo de antemano permite que la clasificación siga al dato en todas las instituciones y no sólo cuando este llegue al SIIVG. De modo que no sea necesario asignar una probabilidad de riesgo para clasificarlo como sensible, y que ninguna institución aplique un nivel de protección menor al que pueda determinar otra institución con el mismo dato. El principio de esta recomendación se funda, por tanto, en que la protección de estos registros y datos no dependa de qué institución los custodie.</p></div>
+          <div class="panel fs-box"><p>La segunda recomendación es que el uso de reservas de información no opere nunca contra la propia víctima. Reconocemos que las causales de denegación dentro de la Ley 21.719 están establecidas por buenas razones, como son proteger la identidad de terceros, resguardar diligencias en curso, evitar que un agresor obtenga información de quien denunció, etc. Pero todas estas razones no tienen que ver con el legítimo derecho que tiene la víctima de conocer y saber qué información tiene el Estado sobre ella y qué uso se le está dando. En este contexto, no es dable la aplicación de reservas que impidan su entrega. Así, la recomendación tiene consecuencias prácticas desde el punto de vista de la entrada de la solicitud de información por parte de la víctima. Si el canal es la OIRS, su aplicación debe operar desde ese mismo punto. Que se le reconozca a la víctima como titular de su información, desde esta misma ventanilla, permitiría que el requerimiento sea tratado un ejercicio de derechos de acceso con garantías que además se establecen en la Ley 21.675. En este sentido, sería responsabilidad de las OIRS, independiente de la institución, hacer valer que si la víctima pregunta qué sabe el Estado sobre ella, sea el Estado quien responda y no una institución en particular.</p></div>
+          <div class="panel fs-box"><p>La tercera, y última recomendación, es que la dispersión de registros se transforme en trazabilidad de datos bajo la forma de un registro único. Esto se inscribe en la discusión sobre qué criterios de cumplimiento debe tener la interoperabilidad en el Estado en la Ley 21.719, considerando además que su reglamento específico aún no se encuentra elaborado. Acá sostenemos que la trazabilidad del dato debe ser generado por la misma capa técnica que mueve la información en un régimen de interoperabilidad. Esto permitiría facilitar el acceso a la información, y que esta sea legible tanto para la víctima como para los funcionarios que deben -además de registrar- hacer uso de esta información para tomar decisiones en su rol. La propia Ley 21.719 establece obligaciones en materia de interoperabilidad, pero la forma de abordar su cumplimiento crea distintos regímenes de interoperabilidad donde el centro es la institución y sus convenios, no el trazado completo de la víctima y sus registros. Es decir, el cumplimento se verifica por un inventario de sistemas conectados y no sobre el trazado de registros que una persona víctima tiene en el Estado. Así, la recomendación estructura que el régimen de interoperabilidad sea la persona y su caso, y no cada sistema e institución conectados. </p></div>
+          <div class="panel fs-box">Por último, si bien las tres recomendaciones podrían admitir su implementación independiente, es importante observar sus posibilidades de aplicación en conjunto. Esto en la medida que responden a tres preguntas encadenadas entre sí: ¿Qué principios definen el carácter sensible de los datos de las víctimas de severas vulneraciones de derechos humanos?; ¿Qué garantías prácticas tienen estas víctimas para acceder a sus registros?; ¿Cómo las instituciones cumplen con un régimen de interoperabilidad que satisfaga las necesidades institucionales como la de las víctimas para acceder a su información de forma legible? Es un hecho que la tercera recomendación está en un orden estructural, que puede aportar decididamente el cumplimiento de las recomendaciones 1 y 2; no obstante, cada una de estas dos recomendaciones, se ven debilitadas si operan en un ecosistema estatal donde la interoperabilidad se despliega solamente con criterios funcionales definidos por las posibilidades de cada institución por separado. Aquí, vemos un espacio donde la Agencia de Protección de Datos, puede hacer las orientaciones necesarias para que la materialización de dicho ecosistema sostenga una interoperabilidad que sea trazable.</p></div>
+        </div>
+      </div>
+    </div>
+    <span class="page-circle" aria-hidden="true"></span>
+    <div class="page-strip" aria-hidden="true"><span class="strip-l"></span><span class="strip-r"></span></div>
+  </section>
+
+</main>
+
+<!-- ============ CONTROLES DE VISUALIZACIÓN ============ -->
+<div class="theme" id="theme">
+  <div class="theme-options" id="themeOptions">
+    <label class="fs-control" title="Tamaño del texto en los cuadros">
+      <span class="fs-small" aria-hidden="true">aA</span>
+      <span class="fs-big" aria-hidden="true">aA</span>
+      <input type="range" id="fsRange" min="0.8" max="1.6" step="0.05" value="1" aria-label="Tamaño del texto en los cuadros">
+    </label>
+    <button type="button" class="sw sw-orange" data-theme-set="orange" aria-label="Versión naranja"></button>
+    <button type="button" class="sw sw-dark"   data-theme-set="dark"   aria-label="Versión negro y blanco (oscuro)"></button>
+    <button type="button" class="sw sw-light"  data-theme-set="light"  aria-label="Versión blanco y negro (iluminado)"></button>
+  </div>
+  <button type="button" class="theme-toggle" id="themeToggle" aria-expanded="false" aria-controls="themeOptions" aria-label="Opciones de visualización">
+    <svg class="ico"><use href="#arrow"/></svg>
+  </button>
+</div>
+
+
+<script>
+/* ===== PORTADA: animación + deslizamiento hacia el índice ===== */
+(async function () {
+  const $ = id => document.getElementById(id);
+  const cover = $('cover'), stage = $('cv-stage'), root = document.documentElement;
+  if (!cover) return;
+
+  /* Si entran con un ancla (#resumen, etc.) se salta la portada */
+  if (location.hash && location.hash !== '#') { cover.remove(); return; }
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Orientación: en vertical (celulares/tablets) la portada usa otra composición */
+  const portraitMQ = matchMedia('(max-aspect-ratio: 1/1)');
+  const portrait = portraitMQ.matches;
+  const sizeVars = () => {
+    cover.style.setProperty('--cw', cover.clientWidth + 'px');
+    cover.style.setProperty('--ch', cover.clientHeight + 'px');
+  };
+  sizeVars();
+  /* Si giran el equipo mientras corre la animación, se salta la portada
+     (los tamaños medidos ya no valdrían); si solo cambia el alto, se recalcula. */
+  const onResize = () => { if (portraitMQ.matches !== portrait) release(); else sizeVars(); };
+  addEventListener('resize', onResize);
+
+  const HOLD = 1200;            // pausa con la portada completa antes de deslizar (ms)
+  const SLIDE = 1300;           // duración del deslizamiento (ms)
+
+  /* Bloquear el sitio mientras la portada está arriba */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0); const sc = $('scroller'); if (sc) sc.scrollTop = 0;
+  root.classList.add('cv-lock');
+  const behind = [...document.body.children].filter(el =>
+    el !== cover && !['SCRIPT', 'LINK', 'STYLE'].includes(el.tagName));
+  behind.forEach(el => el.setAttribute('inert', ''));
+
+  let finished = false, leaving = false, released = false, timer, touchY = null;
+
+  function release() {
+    if (released) return; released = true;
+    cover.remove();
+    root.classList.remove('cv-lock');
+    behind.forEach(el => el.removeAttribute('inert'));
+    removeEventListener('wheel', onWheel); removeEventListener('keydown', onKey);
+    removeEventListener('touchstart', onTouchStart); removeEventListener('touchmove', onTouchMove);
+    removeEventListener('click', go); removeEventListener('resize', onResize);
+    const t = $('index'); if (t) t.setAttribute('tabindex', '-1'), t.focus({ preventScroll: true });
+  }
+
+  function go() {
+    if (!finished || leaving) return; leaving = true; clearTimeout(timer);
+    if (reduce) { release(); return; }
+    cover.style.boxShadow = '0 30px 80px rgba(0,0,0,.35)';
+    cover.style.transition = `transform ${SLIDE}ms cubic-bezier(.76,0,.24,1)`;
+    requestAnimationFrame(() => { cover.style.transform = 'translateY(-100%)'; });
+    cover.addEventListener('transitionend', e => { if (e.target === cover) release(); });
+    setTimeout(release, SLIDE + 300);     // respaldo
+  }
+
+  const onWheel = e => { if (e.deltaY > 0) go(); };
+  const onKey = e => { if (['ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) go(); };
+  const onTouchStart = e => { touchY = e.touches[0].clientY; };
+  const onTouchMove = e => { if (touchY !== null && touchY - e.touches[0].clientY > 30) go(); };
+
+  try { await document.fonts.ready; } catch (e) {}
+  stage.classList.add('ready');
+
+  function arm() {
+    if (released) return;      // si ya se saltó la portada (p. ej. al girar el equipo), no hay nada que armar
+    finished = true;
+    addEventListener('wheel', onWheel, { passive: true });
+    addEventListener('keydown', onKey);
+    addEventListener('touchstart', onTouchStart, { passive: true });
+    addEventListener('touchmove', onTouchMove, { passive: true });
+    addEventListener('click', go);
+    timer = setTimeout(go, HOLD);
+  }
+
+  if (reduce) { finished = true; timer = setTimeout(go, 2500); arm(); return; }
+
+  /* --- 1. Palabra "INCIDIR" centrada (FLIP) --- */
+  const vw = portrait ? cover.clientWidth : innerWidth;
+  const vh = portrait ? cover.clientHeight : innerHeight;
+  const letters = [$('cv-in'), $('cv-ci'), $('cv-dir')];
+  const widths = letters.map(el => el.offsetWidth);
+  const total = widths.reduce((a, b) => a + b, 0);
+  const F = parseFloat(getComputedStyle($('cv-ci')).fontSize);
+  const s = Math.min((portrait ? .8 : .5) * vw / total, 0.9);   // en vertical la palabra central es más grande
+  let x = (vw - total * s) / 2;
+  const yTop = vh / 2 - .36 * F * s;
+
+  const EASE = 'cubic-bezier(.77,0,.18,1)';
+  const SOFT = 'cubic-bezier(.22,.8,.24,1)';
+  const OUT_IN = 'cubic-bezier(.7,0,.84,0)';
+  const IN_OUT = 'cubic-bezier(.16,1,.3,1)';
+  const T = (dx, dy, r, sc) => `translate(${dx}px,${dy}px) rotate(${r}deg) scale(${sc})`;
+  /* Igual en todos los dispositivos: IN sale en horizontal, CI hacia arriba y DIR hacia abajo */
+  const dirs = { 'cv-in': { x: -vw * .6, y: 0 }, 'cv-ci': { x: 0, y: -vh * 1.1 }, 'cv-dir': { x: 0, y: vh * 1.1 } };
+
+  letters.forEach((el, i) => {
+    const cs = getComputedStyle(el);
+    const fl = parseFloat(cs.left), ft = parseFloat(cs.top);
+    const dx = x - fl, dy = yTop - ft;
+    x += widths[i] * s;
+    const endRot = el.id === 'cv-in' ? -90 : 0;
+    const d = dirs[el.id];
+    el.animate([
+      { offset: 0,   opacity: 0, transform: T(dx, dy + 40, 0, s), easing: SOFT },
+      { offset: .15, opacity: 1, transform: T(dx, dy, 0, s),      easing: 'linear' },
+      { offset: .28, opacity: 1, transform: T(dx, dy, 0, s),      easing: OUT_IN },
+      { offset: .45, opacity: 1, transform: T(dx + d.x, dy + d.y, 0, s), easing: 'linear' },
+      { offset: .46, opacity: 1, transform: T(d.x, d.y, endRot, 1), easing: 'linear' },
+      { offset: .54, opacity: 1, transform: T(d.x, d.y, endRot, 1), easing: IN_OUT },
+      { offset: 1,   opacity: 1, transform: T(0, 0, endRot, 1) }
+    ], { duration: 6200, delay: i * 120, fill: 'both' });
+  });
+
+  /* --- 2. Rectángulos: se deslizan en línea recta desde afuera (tipo slide) --- */
+  const SLIDE_EASE = 'cubic-bezier(.65,0,.25,1)';
+  const slide = (el, from, delay) => el.animate([
+    { transform: from },
+    { transform: 'translate(0,0)' }
+  ], { duration: 1300, delay, easing: SLIDE_EASE, fill: 'both' });
+
+  slide($('cv-p-tl'), 'translateY(-100%)', 2500);   // entra desde arriba
+  slide($('cv-p-tr'), 'translateX(100%)',  2650);   // entra desde la derecha
+  slide($('cv-p-bl'), 'translateX(-100%)', 2800);   // entra desde la izquierda
+  slide($('cv-p-br'), 'translateY(100%)',  2950);   // entra desde abajo
+
+  /* El círculo entra al final, deslizándose desde dentro de su rectángulo:
+     queda recortado por el borde (overflow: hidden) y sale desde el borde derecho. */
+  const circ = $('cv-circle');
+  const pr = $('cv-p-tl').getBoundingClientRect();
+  const cr = circ.getBoundingClientRect();
+  const hide = pr.right - cr.left + 2;
+  circ.animate([
+    { transform: `translateX(${hide}px)` },
+    { transform: 'translateX(0)' }
+  ], { duration: 1300, delay: 4100, easing: SLIDE_EASE, fill: 'both' });
+
+  /* --- 3. Textos y línea --- */
+  const rise = (el, delay, base = '') => el.animate([
+    { opacity: 0, transform: `${base} translateY(14px)` },
+    { opacity: 1, transform: `${base} translateY(0)` }
+  ], { duration: 900, delay, easing: SOFT, fill: 'both' });
+  rise($('cv-logo'), 5000, 'translate(-50%,-50%)');
+  rise($('cv-sub'), 5100);
+  $('cv-vert').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 5300, easing: SOFT, fill: 'both' });
+  $('cv-rule').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+                       { duration: 1200, delay: 5200, easing: EASE, fill: 'both' });
+
+  /* Al terminar: pausa breve y deslizamiento hacia el índice */
+  await Promise.all(stage.getAnimations({ subtree: true }).map(a => a.finished.catch(() => {})));
+  arm();
+})();
+</script>
+
+<script>
+/* Data Justa · Serie Policy Brief (2026) */
+(() => {
+  const $  = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const root = document.documentElement;
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isMobile = () => window.matchMedia('(max-width: 900px)').matches;
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  /* ---------------- Tema de color ---------------- */
+  const swatches = $$('[data-theme-set]');
+  function setTheme(name) {
+    if (name === 'orange' || !name) root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', name);
+    swatches.forEach(s => s.setAttribute('aria-pressed', String(s.dataset.themeSet === (name || 'orange'))));
+    store.set('dj-theme', name || 'orange');
+  }
+  setTheme(store.get('dj-theme') || 'orange');
+  swatches.forEach(s => s.addEventListener('click', () => setTheme(s.dataset.themeSet)));
+
+  /* ---------------- Tamaño de letra de los cuadros ---------------- */
+  const fsRange = $('#fsRange');
+  function setFs(v) {
+    root.style.setProperty('--fs', v);
+    fsRange.value = v;
+    store.set('dj-fs', v);
+  }
+  setFs(store.get('dj-fs') || 1);
+  fsRange.addEventListener('input', () => setFs(fsRange.value));
+
+  /* ---------------- Botón de opciones ---------------- */
+  const theme = $('#theme');
+  const toggle = $('#themeToggle');
+  function setOptions(open) {
+    theme.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', () => setOptions(!theme.classList.contains('open')));
+  document.addEventListener('click', e => { if (!theme.contains(e.target)) setOptions(false); });
+
+  /* ---------------- Barra superior / botón visibles fuera del índice ---------------- */
+  const index = $('#index');
+  const topbar = $('.topbar');
+  new IntersectionObserver(([entry]) => {
+    const onIndex = entry.intersectionRatio > 0.5;
+    topbar.classList.toggle('show', !onIndex);
+    theme.classList.toggle('show', !onIndex);
+    if (onIndex) setOptions(false);
+  }, { threshold: [0, 0.5, 1] }).observe(index);
+
+  /* ---------------- Índice: expansión y filas ---------------- */
+  const list = $('.idx-list');
+  const items = $$('.idx-item');
+  let hoverTimer = null;
+  let lockUntil = 0;
+
+  function openItem(item) {
+    if (!item.style.getPropertyValue('--fit')) fitTitles();
+    items.forEach(i => i.classList.toggle('open', i === item));
+    index.classList.add('is-open');
+  }
+  function closeIndex() {
+    items.forEach(i => i.classList.remove('open'));
+    index.classList.remove('is-open');
+  }
+
+  if (canHover) {
+    list.addEventListener('mouseenter', () => index.classList.add('is-open'));
+    list.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); closeIndex(); });
+    items.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimer);
+        if (item.classList.contains('open')) return;
+        // pequeña espera para evitar parpadeos mientras las filas cambian de alto
+        const wait = Math.max(70, lockUntil - performance.now());
+        hoverTimer = setTimeout(() => {
+          openItem(item);
+          lockUntil = performance.now() + 450;
+        }, wait);
+      });
+      item.addEventListener('mouseleave', () => clearTimeout(hoverTimer));
+    });
+  }
+
+  items.forEach(item => {
+    const head = $('.idx-item-head', item);
+    // En pantallas táctiles: primer toque abre la fila, el segundo lleva a la sección
+    head.addEventListener('click', e => {
+      if (!canHover && !item.classList.contains('open')) {
+        e.preventDefault();
+        openItem(item);
+      }
+    });
+    head.addEventListener('focus', () => openItem(item));
+  });
+  list.addEventListener('focusout', e => { if (!list.contains(e.relatedTarget)) closeIndex(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeIndex(); setOptions(false); } });
+
+  /* Ajusta el tamaño del título desplegado para que quepa en una línea */
+  function fitTitles() {
+    if (isMobile()) { items.forEach(i => i.style.removeProperty('--fit')); return; }
+    const u = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    const avail = index.clientWidth - (25 + 192 + 15 + 24) * u;
+    items.forEach(item => {
+      const name = $('.idx-name', item);
+      const probe = name.cloneNode(true);
+      probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;transition:none;' +
+        'font-size:100px;font-weight:500;letter-spacing:-.005em;width:max-content;';
+      name.parentNode.appendChild(probe);
+      const w100 = probe.getBoundingClientRect().width || 1;
+      probe.remove();
+      const size = Math.min(118 * u, (avail / w100) * 100);
+      item.style.setProperty('--fit', size.toFixed(2) + 'px');
+    });
+  }
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('500 100px "Work Sans"', 'Marisol víctima').then(fitTitles, fitTitles);
+  }
+  window.addEventListener('load', fitTitles);
+  fitTitles();
+  window.addEventListener('resize', fitTitles);
+
+
+  /* Centra verticalmente el título "Serie–Policy Brief(2026)" entre sus dos líneas:
+     mide la tinta real (paréntesis y "y" incluidos) y ajusta la altura de línea. */
+  const titleEl = $('.idx-title');
+  const probeCtx = document.createElement('canvas').getContext('2d');
+  function centerTitle() {
+    if (!titleEl) return;
+    titleEl.style.fontSize = '';
+    if (isMobile()) { titleEl.style.lineHeight = ''; return; }
+    const cs = getComputedStyle(titleEl);
+    const raw = titleEl.textContent;
+    const text = cs.textTransform === 'uppercase' ? raw.toUpperCase() : raw;
+    const setFont = px => { probeCtx.font = `${cs.fontWeight} ${px}px ${cs.fontFamily}`; };
+    /* Si el título (en mayúsculas) no cabe en su fila, se reduce lo justo para que entre */
+    let size = parseFloat(cs.fontSize);
+    setFont(size);
+    const ls = (parseFloat(cs.letterSpacing) || 0) / size;           // en em
+    const avail = titleEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const w = probeCtx.measureText(text).width + ls * size * text.length;
+    if (w > avail * 0.985) {
+      size = size * avail * 0.985 / w;
+      titleEl.style.fontSize = size.toFixed(2) + 'px';
+      setFont(size);
+    }
+    const m = probeCtx.measureText(text);
+    if (m.fontBoundingBoxAscent === undefined) return;          // navegador antiguo: queda el valor del CSS
+    const A = m.fontBoundingBoxAscent, D = m.fontBoundingBoxDescent;
+    const a = m.actualBoundingBoxAscent, d = m.actualBoundingBoxDescent;
+    const H = titleEl.clientHeight;                              // alto útil de la fila (sin la línea inferior)
+    const baseline = H / 2 + (a - d) / 2;                        // línea base que deja la tinta al centro
+    titleEl.style.lineHeight = (2 * baseline - A + D).toFixed(2) + 'px';
+  }
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('800 100px "Work Sans"', 'SERIE–POLICY BRIEF(2026)').then(centerTitle, centerTitle);
+  }
+  window.addEventListener('load', centerTitle);
+  window.addEventListener('resize', centerTitle);
+  centerTitle();
+
+  /* ---------------- Pestañas de cada página ---------------- */
+  $$('.tabs').forEach(tabs => {
+    const page = tabs.closest('.page');
+    const lis = $$('.tab-list li', tabs);
+    const panels = $$('.panel', tabs);
+
+    lis.forEach((li, i) => {
+      const id = `${page.id}-panel-${i}`;
+      panels[i].id = id;
+      panels[i].setAttribute('tabindex', '0');
+      li.querySelector('button').setAttribute('aria-controls', id);
+    });
+
+    function activate(i, open = true) {
+      lis.forEach((li, j) => {
+        li.classList.toggle('active', j === i);
+        li.querySelector('button').setAttribute('aria-expanded', String(open && j === i));
+      });
+      panels.forEach((p, j) => p.classList.toggle('active', j === i));
+      tabs.classList.toggle('open', open);
+      page.classList.toggle('tabs-open', open);
+    }
+    const close = () => activate(0, false);
+    activate(0, false);
+
+    lis.forEach((li, i) => {
+      const btn = li.querySelector('button');
+      if (canHover) btn.addEventListener('mouseenter', () => activate(i));
+      btn.addEventListener('click', () => {
+        if (!canHover && !isMobile() && tabs.classList.contains('open') && li.classList.contains('active')) close();
+        else activate(i);
+      });
+      btn.addEventListener('focus', () => activate(i));
+    });
+
+    if (canHover) tabs.addEventListener('mouseleave', close);
+    tabs.addEventListener('focusout', e => { if (!tabs.contains(e.relatedTarget)) close(); });
+  });
+})();
+
+</script>
+</body>
+</html>
